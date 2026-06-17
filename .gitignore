@@ -1,0 +1,18 @@
+# Publish only the static site: index.html, README.md, .nojekyll, .gitignore
+
+# build / local
+.venv/
+__pycache__/
+*.pyc
+*.docx
+*.pptx
+~$*
+.DS_Store
+
+# internal — keep OUT of the public repo
+docs/
+shots/
+*.py
+CLAUDE.md
+gen-ai-3d-showcase.html
+cloud-eng-ai-initiatives.html

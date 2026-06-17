@@ -1,0 +1,1538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloud Engineering Faction · Gen AI Initiatives · Orange Business</title>
+<style>
+/* ============================================================
+   ORANGE BRAND TOKENS  (from tokens.json — do not hand-edit hex)
+   ============================================================ */
+:root{
+  --orange-brand:#FF7900;        /* signature — big accents only */
+  --orange-accessible:#F16E00;   /* small text / UI on light */
+  --orange-black:#000000;
+  --orange-white:#FFFFFF;
+  --orange-grey-light:#D6D6D6;
+  --orange-grey-mid:#8F8F8F;
+  --orange-grey-dark:#595959;
+  --orange-blue:#4BB4E6;
+  --orange-green:#50BE87;
+  --orange-pink:#FFB4E6;
+  --orange-purple:#A885D8;
+  --orange-yellow:#FFD200;
+  --orange-font:"Helvetica Neue",Helvetica,Arial,sans-serif;
+
+  /* stage tokens (dark stage so 3D pops; on-brand black neutral) */
+  --stage-0:#0a0a0c;
+  --stage-1:#141417;
+  --stage-2:#1d1d22;
+  --ink:#FFFFFF;
+  --ink-soft:#D6D6D6;
+  --ink-mute:#8F8F8F;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--orange-font);
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 800px at 80% -10%, rgba(255,121,0,.18), transparent 60%),
+    radial-gradient(900px 700px at 0% 110%, rgba(75,180,230,.12), transparent 55%),
+    var(--stage-0);
+  overflow:hidden;
+}
+
+/* ============================================================
+   HEADER (logo + title + counter)   logo on dark = high contrast
+   ============================================================ */
+.topbar{
+  position:fixed; inset:0 0 auto 0; z-index:50;
+  display:flex; align-items:center; gap:18px;
+  padding:14px 26px;                      /* clear-space around logo */
+  background:linear-gradient(180deg, rgba(10,10,12,.92), rgba(10,10,12,0));
+  pointer-events:none;
+}
+.brand-logo{
+  height:40px; width:auto; display:block;  /* > 32px min size */
+  pointer-events:auto;
+}
+.topbar .titleblock{line-height:1.1}
+.topbar .kicker{
+  font-size:11px; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--orange-brand); font-weight:700; margin:0;
+}
+.topbar .deckname{font-size:14px; color:var(--ink-soft); margin:2px 0 0; font-weight:400}
+.topbar .spacer{flex:1}
+.counter{
+  pointer-events:auto;
+  font-variant-numeric:tabular-nums; text-align:right; line-height:1.15;
+}
+.counter .big{font-size:22px; font-weight:700}
+.counter .big b{color:var(--orange-brand)}
+.counter .lbl{font-size:11px; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-mute)}
+
+/* ============================================================
+   DECK / SLIDES
+   ============================================================ */
+#deck{position:fixed; inset:0; z-index:10}
+.slide{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:96px 6vw 120px;
+  opacity:0; visibility:hidden;
+  transform:translateX(70px) rotateY(16deg) scale(.96);
+  transition:opacity .55s ease, transform .55s cubic-bezier(.22,.61,.36,1), visibility 0s linear .55s;
+  will-change:transform,opacity;
+}
+.slide.active{
+  opacity:1; visibility:visible;
+  transform:none;
+  transition:opacity .55s ease, transform .6s cubic-bezier(.22,.61,.36,1), visibility 0s;
+}
+.slide.leaving-left{transform:translateX(-70px) rotateY(-16deg) scale(.96)}
+.slide.leaving-right{transform:translateX(70px) rotateY(16deg) scale(.96)}
+
+/* slide chrome: name + how-built caption */
+.eyebrow{
+  font-size:12px; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--orange-brand); font-weight:700; margin:0 0 10px;
+}
+.slide h2{
+  font-size:clamp(28px,4.4vw,52px); font-weight:700; margin:0 0 6px; text-align:center;
+  letter-spacing:-.01em;
+}
+.stage{
+  flex:1; width:100%; max-width:1100px;
+  display:flex; align-items:center; justify-content:center;
+  min-height:0;
+}
+.howto{
+  max-width:780px; text-align:center; color:var(--ink-soft);
+  font-size:15px; line-height:1.5; margin:14px auto 0;
+}
+.howto code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px; color:var(--orange-brand);
+  background:rgba(255,121,0,.10); padding:1px 6px; border-radius:5px;
+}
+.badges{display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap}
+.badge{
+  font-size:11px; letter-spacing:.04em; padding:4px 10px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.18); color:var(--ink-soft);
+}
+.badge.easy{border-color:rgba(80,190,135,.5); color:#7fe0ab}
+.badge.med{border-color:rgba(255,210,0,.5); color:#ffdf57}
+.badge.hard{border-color:rgba(255,121,0,.6); color:var(--orange-brand)}
+.badge.src{border-color:rgba(75,180,230,.5); color:#86d3f3}
+
+/* ============================================================
+   COVER  +  CLOSING
+   ============================================================ */
+.cover{gap:0}
+.cover .ribbon{
+  font-size:13px; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--orange-brand); font-weight:700; margin-bottom:18px;
+}
+.cover h1{
+  font-size:clamp(40px,8vw,104px); line-height:.98; margin:0; font-weight:700;
+  letter-spacing:-.02em; text-align:center;
+}
+.cover h1 .hl{color:var(--orange-brand)}
+.cover p{color:var(--ink-soft); font-size:clamp(15px,1.6vw,20px); margin:22px 0 0; max-width:620px; text-align:center}
+.cover .hint{margin-top:40px; color:var(--ink-mute); font-size:13px; letter-spacing:.04em}
+.cover .hint kbd{
+  font-family:var(--orange-font); border:1px solid var(--ink-mute); border-radius:6px;
+  padding:2px 9px; margin:0 2px; color:var(--ink-soft); font-size:12px;
+}
+
+/* ============================================================
+   0 · ROTATING PARTICLE GLOBE  (centerpiece)
+   ============================================================ */
+.globe-scene{perspective:1200px; width:720px; height:720px; max-width:92vw; position:relative}
+.globe{position:relative; width:100%; height:100%; transform-style:preserve-3d;
+  transform:rotateX(-12deg); animation:globe-spin 26s infinite linear}
+.globe.paused{animation-play-state:paused}
+@keyframes globe-spin{from{transform:rotateX(-12deg) rotateY(0)} to{transform:rotateX(-12deg) rotateY(360deg)}}
+.particle{position:absolute; top:50%; left:50%; width:6px; height:6px; margin:-3px 0 0 -3px;
+  border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle at 32% 28%, #ffe2c6 0%, var(--orange-brand) 52%, #9c4900 100%);
+  box-shadow:0 0 5px rgba(255,121,0,.5);
+  transform:var(--pos,none);                 /* positioned even if animation off */
+  animation:billboard 26s infinite linear}    /* counter-spin = always face camera */
+@keyframes billboard{
+  from{transform:var(--pos,none) rotateY(0)}
+  to{transform:var(--pos,none) rotateY(-360deg)}
+}
+.globe.paused .particle{animation-play-state:paused}
+.particle.big{width:18px; height:18px; margin:-9px 0 0 -9px; pointer-events:auto; cursor:pointer; z-index:2;
+  background:radial-gradient(circle at 32% 28%, #ffffff 0%, #FFA64D 52%, #c25f00 100%);
+  box-shadow:0 0 16px var(--orange-brand); transition:box-shadow .15s, filter .15s}
+.particle.big:hover{filter:brightness(1.35); box-shadow:0 0 24px #fff, 0 0 12px var(--orange-brand)}
+.globe-pop{position:absolute; transform:translate(-50%,-145%); z-index:30;
+  background:rgba(18,18,22,.94); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  border:1px solid var(--orange-brand); border-radius:12px; padding:10px 16px; cursor:pointer;
+  display:flex; flex-direction:column; gap:2px; white-space:nowrap; pointer-events:auto;
+  box-shadow:0 14px 34px -12px rgba(0,0,0,.75)}
+.globe-pop .t{font-weight:700; font-size:15px; color:#fff}
+.globe-pop .c{font-size:11px; color:var(--orange-brand); letter-spacing:.04em}
+.globe-pop::after{content:""; position:absolute; left:50%; bottom:-6px; width:11px; height:11px;
+  transform:translateX(-50%) rotate(45deg); background:rgba(18,18,22,.94);
+  border-right:1px solid var(--orange-brand); border-bottom:1px solid var(--orange-brand)}
+
+/* ============================================================
+   1 · 3D CARD FLIP
+   ============================================================ */
+.flip-scene{perspective:1100px; width:300px; height:400px}
+.flip-card{
+  position:relative; width:100%; height:100%;
+  transform-style:preserve-3d; transition:transform 1s cubic-bezier(.6,.05,.2,1);
+  cursor:pointer;
+}
+.flip-scene:hover .flip-card,.flip-card.flipped{transform:rotateY(180deg)}
+.flip-face{
+  position:absolute; inset:0; border-radius:22px; backface-visibility:hidden;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:30px; text-align:center; box-shadow:0 30px 60px -20px rgba(0,0,0,.7);
+}
+.flip-front{background:linear-gradient(150deg,#FF7900,#c85a00); color:#fff}
+.flip-front .big{font-size:60px; font-weight:700}
+.flip-back{
+  background:linear-gradient(150deg,var(--stage-2),#0c0c10);
+  border:1px solid rgba(255,121,0,.4); color:var(--ink); transform:rotateY(180deg);
+}
+.flip-back h3{margin:0 0 8px; color:var(--orange-brand)}
+.flip-hint{position:absolute; bottom:16px; font-size:12px; color:rgba(255,255,255,.7); letter-spacing:.04em}
+
+/* ============================================================
+   2 · MOUSE TILT + PARALLAX CARD
+   ============================================================ */
+.tilt-scene{perspective:900px}
+.tilt-card{
+  width:340px; height:420px; border-radius:24px; position:relative;
+  transform-style:preserve-3d;
+  transform:rotateX(calc(var(--py,0)*-12deg)) rotateY(calc(var(--px,0)*14deg));
+  transition:transform .15s ease-out;
+  background:linear-gradient(150deg,#1a1a20,#0b0b0f);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.8);
+}
+.tilt-card>*{position:absolute; transform-style:preserve-3d}
+.tilt-glow{
+  inset:0; border-radius:24px; pointer-events:none;
+  background:radial-gradient(420px circle at calc(50% + var(--px,0)*40%) calc(50% + var(--py,0)*40%), rgba(255,121,0,.35), transparent 60%);
+}
+.tilt-l1{top:34px; left:34px; transform:translateZ(40px); font-size:13px; letter-spacing:.22em; color:var(--orange-brand); font-weight:700}
+.tilt-l2{top:120px; left:34px; right:34px; transform:translateZ(70px); font-size:34px; font-weight:700; line-height:1.05}
+.tilt-l3{bottom:90px; left:34px; right:34px; transform:translateZ(50px); color:var(--ink-soft); font-size:14px; line-height:1.5}
+.tilt-chip{bottom:34px; left:34px; transform:translateZ(95px);
+  background:var(--orange-brand); color:#fff; font-weight:700; font-size:13px; padding:8px 16px; border-radius:999px}
+
+/* ============================================================
+   3 · ROTATING 3D CUBE
+   ============================================================ */
+.cube-scene{perspective:1200px; width:220px; height:220px}
+.cube{
+  position:relative; width:100%; height:100%; transform-style:preserve-3d;
+  animation:cube-spin 16s infinite linear;
+  transform:translateZ(-110px);
+}
+@keyframes cube-spin{
+  from{transform:translateZ(-110px) rotateX(-20deg) rotateY(0)}
+  to{transform:translateZ(-110px) rotateX(-20deg) rotateY(360deg)}
+}
+.cube-face{
+  position:absolute; width:220px; height:220px;
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  font-weight:700; font-size:22px; color:#fff; padding:18px;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,121,0,.16); backdrop-filter:blur(2px);
+}
+.cube-face.f1{background:rgba(255,121,0,.28); transform:rotateY(0deg)   translateZ(110px)}
+.cube-face.f2{background:rgba(75,180,230,.26); transform:rotateY(90deg)  translateZ(110px)}
+.cube-face.f3{background:rgba(80,190,135,.26); transform:rotateY(180deg) translateZ(110px)}
+.cube-face.f4{background:rgba(168,133,216,.28);transform:rotateY(-90deg) translateZ(110px)}
+.cube-face.f5{background:rgba(255,210,0,.22);  transform:rotateX(90deg)  translateZ(110px)}
+.cube-face.f6{background:rgba(255,180,230,.24);transform:rotateX(-90deg) translateZ(110px)}
+
+/* ============================================================
+   4 · 3D CAROUSEL RING (cylinder of panels)
+   ============================================================ */
+.ring-scene{perspective:1400px; width:100%; height:340px}
+.ring{
+  position:relative; width:200px; height:280px; margin:0 auto;
+  transform-style:preserve-3d; animation:ring-spin 22s infinite linear;
+}
+@keyframes ring-spin{from{transform:rotateY(0)} to{transform:rotateY(360deg)}}
+.ring-panel{
+  position:absolute; inset:0; border-radius:16px; padding:22px;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  border:1px solid rgba(255,255,255,.16);
+  background:linear-gradient(160deg,rgba(255,121,0,.22),rgba(20,20,24,.92));
+  box-shadow:0 0 40px rgba(0,0,0,.4) inset;
+  backface-visibility:hidden;
+}
+.ring-panel h4{margin:0 0 4px; font-size:18px}
+.ring-panel span{font-size:12px; color:var(--ink-soft)}
+.ring-panel .num{position:absolute; top:14px; left:18px; font-size:40px; font-weight:700; color:rgba(255,121,0,.55)}
+
+/* ============================================================
+   5 · HOLOGRAPHIC FOIL CARD
+   ============================================================ */
+.holo-scene{perspective:1000px}
+.holo-card{
+  position:relative; width:330px; height:440px; border-radius:20px; overflow:hidden;
+  transform-style:preserve-3d;
+  transform:rotateX(calc(var(--py,0)*-16deg)) rotateY(calc(var(--px,0)*18deg));
+  transition:transform .2s ease;
+  background:#0c0c12; border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 40px 80px -30px rgba(0,0,0,.8);
+}
+.holo-art{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px; z-index:1}
+.holo-art .glyph{font-size:90px; line-height:1}
+.holo-art h3{margin:14px 0 4px}
+.holo-art p{margin:0; color:var(--ink-soft); font-size:13px}
+.holo-foil{
+  position:absolute; inset:0; mix-blend-mode:color-dodge; pointer-events:none; z-index:2;
+  background:
+    linear-gradient(115deg,transparent 20%,rgba(255,121,0,.55) 36%,rgba(75,180,230,.55) 44%,rgba(168,133,216,.55) 52%,rgba(80,190,135,.55) 60%,transparent 76%);
+  background-size:300% 300%;
+  background-position:calc(var(--px,0)*-100% + 50%) calc(var(--py,0)*-100% + 50%);
+  filter:saturate(1.4);
+}
+.holo-glare{
+  position:absolute; inset:0; pointer-events:none; z-index:3; mix-blend-mode:overlay;
+  background:radial-gradient(300px circle at calc(50% + var(--px,0)*55%) calc(50% + var(--py,0)*55%), rgba(255,255,255,.55), transparent 55%);
+}
+
+/* ============================================================
+   6 · GLASSMORPHISM FROSTED PANEL
+   ============================================================ */
+.glass-scene{position:relative; width:560px; max-width:88vw; height:360px; border-radius:24px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center}
+.glass-bg{position:absolute; inset:-40px; filter:blur(0); z-index:0}
+.glass-bg span{position:absolute; border-radius:50%; filter:blur(6px); animation:blob 14s infinite ease-in-out}
+.glass-bg .b1{width:230px;height:230px;background:var(--orange-brand);top:-30px;left:-20px}
+.glass-bg .b2{width:200px;height:200px;background:var(--orange-blue);bottom:-40px;right:0;animation-delay:-4s}
+.glass-bg .b3{width:180px;height:180px;background:var(--orange-purple);top:40px;right:120px;animation-delay:-8s}
+@keyframes blob{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,30px) scale(1.15)}66%{transform:translate(-30px,20px) scale(.9)}}
+.glass-panel{
+  position:relative; z-index:1; width:420px; max-width:80%; padding:34px;
+  border-radius:18px; text-align:center;
+  background:rgba(255,255,255,.10);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border:1px solid rgba(255,255,255,.28);
+  box-shadow:0 20px 50px -20px rgba(0,0,0,.6);
+}
+.glass-panel h3{margin:0 0 8px; font-size:26px}
+.glass-panel p{margin:0; color:#f0f0f0; font-size:14px; line-height:1.5}
+
+/* ============================================================
+   7 · 3D EXTRUDED TEXT
+   ============================================================ */
+.extrude-scene{perspective:900px}
+.extrude{
+  font-size:clamp(54px,12vw,150px); font-weight:700; letter-spacing:-.02em;
+  color:var(--orange-brand); transform-style:preserve-3d;
+  animation:extrude-sway 7s infinite ease-in-out;
+  text-shadow:
+    1px 1px 0 #c85a00, 2px 2px 0 #b65200, 3px 3px 0 #a44a00, 4px 4px 0 #934200,
+    5px 5px 0 #813a00, 6px 6px 0 #6f3200, 7px 7px 0 #5d2a00, 8px 8px 0 #4b2200,
+    10px 10px 22px rgba(0,0,0,.6);
+}
+@keyframes extrude-sway{0%,100%{transform:rotateY(-22deg) rotateX(6deg)}50%{transform:rotateY(22deg) rotateX(-4deg)}}
+
+/* ============================================================
+   8 · FLIP CLOCK
+   ============================================================ */
+.clock{display:flex; gap:10px; align-items:center; perspective:700px}
+.clock .colon{font-size:46px; font-weight:700; color:var(--orange-brand); opacity:.8}
+.digit{
+  position:relative; width:78px; height:108px; border-radius:12px;
+  background:linear-gradient(180deg,#26262c,#15151a);
+  border:1px solid rgba(255,255,255,.10);
+  display:flex; align-items:center; justify-content:center;
+  font-size:64px; font-weight:700; color:#fff;
+  box-shadow:0 14px 30px -12px rgba(0,0,0,.8);
+}
+.digit::after{content:""; position:absolute; left:6px; right:6px; top:50%; height:1px; background:rgba(0,0,0,.55)}
+.digit.flip{animation:digit-flip .5s ease}
+@keyframes digit-flip{
+  0%{transform:rotateX(0)}
+  49%{transform:rotateX(-90deg)}
+  50%{transform:rotateX(90deg)}
+  100%{transform:rotateX(0)}
+}
+
+/* ============================================================
+   9 · NEON ISOMETRIC 3D BUTTONS
+   ============================================================ */
+.iso-scene{perspective:800px; display:flex; gap:34px; flex-wrap:wrap; justify-content:center}
+.iso-btn{
+  --c:var(--orange-brand);
+  position:relative; padding:22px 30px; border-radius:14px; cursor:pointer;
+  font-size:18px; font-weight:700; color:#fff; letter-spacing:.02em;
+  background:linear-gradient(180deg,var(--c),rgba(0,0,0,.2));
+  transform:rotateX(34deg) rotateZ(-12deg) translateZ(0);
+  transform-style:preserve-3d; transition:transform .2s ease, box-shadow .2s ease;
+  box-shadow:0 18px 0 -2px rgba(0,0,0,.55), 0 0 26px var(--c);
+}
+.iso-btn.c2{--c:var(--orange-blue)} .iso-btn.c3{--c:var(--orange-green)}
+.iso-btn:hover{transform:rotateX(34deg) rotateZ(-12deg) translateZ(26px); box-shadow:0 30px 0 -2px rgba(0,0,0,.5), 0 0 44px var(--c)}
+.iso-btn:active{transform:rotateX(34deg) rotateZ(-12deg) translateZ(6px); box-shadow:0 8px 0 -2px rgba(0,0,0,.6), 0 0 30px var(--c)}
+
+/* ============================================================
+   10 · ORIGAMI FOLD-IN
+   ============================================================ */
+.fold-scene{perspective:1300px; width:300px; height:300px}
+.fold{position:relative; width:100%; height:100%; transform-style:preserve-3d; animation:fold-tip 8s infinite ease-in-out}
+@keyframes fold-tip{0%,100%{transform:rotateX(8deg) rotateY(0)}50%{transform:rotateX(8deg) rotateY(-12deg)}}
+.panel{position:absolute; width:150px; height:300px; top:0; overflow:hidden;
+  display:flex; align-items:center; font-size:54px; font-weight:700; color:#fff}
+.panel.left{left:0; transform-origin:right center; background:linear-gradient(120deg,#FF7900,#a44a00);
+  justify-content:flex-end; padding-right:8px; animation:fold-left 8s infinite ease-in-out}
+.panel.right{left:150px; transform-origin:left center; background:linear-gradient(300deg,#FF7900,#c85a00);
+  justify-content:flex-start; padding-left:8px; animation:fold-right 8s infinite ease-in-out}
+@keyframes fold-left{0%,100%{transform:rotateY(0)}50%{transform:rotateY(72deg)}}
+@keyframes fold-right{0%,100%{transform:rotateY(0)}50%{transform:rotateY(-72deg)}}
+
+/* ============================================================
+   11 · CUBE TRANSITION CAROUSEL (stepped face reveal)
+   ============================================================ */
+.ctrans-scene{perspective:1400px; width:300px; height:200px}
+.ctrans{position:relative; width:100%; height:100%; transform-style:preserve-3d;
+  transform:translateZ(-100px); animation:ctrans-step 12s infinite}
+@keyframes ctrans-step{
+  0%,22%{transform:translateZ(-100px) rotateY(0)}
+  25%,47%{transform:translateZ(-100px) rotateY(-90deg)}
+  50%,72%{transform:translateZ(-100px) rotateY(-180deg)}
+  75%,97%{transform:translateZ(-100px) rotateY(-270deg)}
+  100%{transform:translateZ(-100px) rotateY(-360deg)}
+}
+.ctrans-face{position:absolute; width:300px; height:200px; border-radius:16px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;
+  border:1px solid rgba(255,255,255,.18); color:#fff}
+.ctrans-face h4{margin:0 0 6px; font-size:24px}
+.ctrans-face p{margin:0; color:var(--ink-soft); font-size:13px}
+.ctrans-face.s1{background:linear-gradient(150deg,rgba(255,121,0,.4),#15151a); transform:rotateY(0)   translateZ(100px)}
+.ctrans-face.s2{background:linear-gradient(150deg,rgba(75,180,230,.4),#15151a); transform:rotateY(90deg) translateZ(100px)}
+.ctrans-face.s3{background:linear-gradient(150deg,rgba(80,190,135,.4),#15151a); transform:rotateY(180deg)translateZ(100px)}
+.ctrans-face.s4{background:linear-gradient(150deg,rgba(168,133,216,.4),#15151a);transform:rotateY(270deg)translateZ(100px)}
+
+/* ============================================================
+   12 · LAYERED PARALLAX DEPTH SCENE (mouse, HUD)
+   ============================================================ */
+.depth-scene{perspective:1000px; width:560px; max-width:90vw; height:380px}
+.depth-stage{position:relative; width:100%; height:100%; transform-style:preserve-3d;
+  transform:rotateX(calc(var(--py,0)*-10deg)) rotateY(calc(var(--px,0)*12deg)); transition:transform .15s ease}
+.depth-stage>div{position:absolute; transform-style:preserve-3d; will-change:transform}
+.dl{border-radius:16px; display:flex; align-items:center; justify-content:center; font-weight:700}
+.dl.back{inset:0; background:linear-gradient(160deg,#16161b,#0a0a0e); border:1px solid rgba(255,255,255,.08);
+  transform:translateZ(-40px); color:rgba(255,255,255,.06); font-size:140px}
+.dl.mid{top:60px; left:50px; right:50px; height:150px; background:rgba(255,121,0,.16);
+  border:1px solid rgba(255,121,0,.4); transform:translateZ(30px) translate(calc(var(--px,0)*-14px),calc(var(--py,0)*-14px));
+  color:#fff; font-size:26px}
+.dl.front{bottom:50px; left:90px; background:var(--orange-brand); color:#fff; padding:14px 22px; border-radius:12px;
+  transform:translateZ(80px) translate(calc(var(--px,0)*-30px),calc(var(--py,0)*-30px)); font-size:16px}
+.dl.tag{top:30px; right:54px; background:var(--orange-blue); color:#06222e; padding:8px 14px; border-radius:999px;
+  transform:translateZ(110px) translate(calc(var(--px,0)*-42px),calc(var(--py,0)*-42px)); font-size:13px}
+
+/* ============================================================
+   13 · 3D COVERFLOW GALLERY (auto-flowing covers)
+   ============================================================ */
+.cf-scene{perspective:1100px; width:100%; height:340px; overflow:hidden;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.cf-track{display:flex; gap:46px; height:100%; align-items:center; width:max-content;
+  transform-style:preserve-3d; padding:0 50%; animation:cf-slide 18s infinite linear}
+@keyframes cf-slide{from{transform:translateX(0)} to{transform:translateX(-50%)}}
+.cf-cover{
+  flex:0 0 auto; width:190px; height:240px; border-radius:14px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center; padding:18px;
+  transform:rotateY(-38deg); transform-style:preserve-3d; color:#fff; font-weight:700;
+  border:1px solid rgba(255,255,255,.16);
+  box-shadow:-24px 18px 40px -18px rgba(0,0,0,.8);
+  -webkit-box-reflect:below 6px linear-gradient(transparent 60%, rgba(255,255,255,.18));
+}
+.cf-cover .g{font-size:46px}
+.cf-cover span{font-size:13px; color:var(--ink-soft); font-weight:400}
+.cf-cover:nth-child(6n+1){background:linear-gradient(150deg,#FF7900,#7a3700)}
+.cf-cover:nth-child(6n+2){background:linear-gradient(150deg,#4BB4E6,#0d3d52)}
+.cf-cover:nth-child(6n+3){background:linear-gradient(150deg,#50BE87,#13402c)}
+.cf-cover:nth-child(6n+4){background:linear-gradient(150deg,#A885D8,#34234d)}
+.cf-cover:nth-child(6n+5){background:linear-gradient(150deg,#FFD200,#5a4a00); color:#1a1500}
+.cf-cover:nth-child(6n){background:linear-gradient(150deg,#FFB4E6,#5a3450)}
+
+/* ============================================================
+   14 · ROTATING 3D TEXT RING
+   ============================================================ */
+.tring-scene{perspective:1100px; width:100%; height:300px; display:flex; align-items:center; justify-content:center}
+.tring{position:relative; width:200px; height:60px; transform-style:preserve-3d;
+  animation:tring-spin 18s infinite linear; transform:rotateX(-8deg)}
+@keyframes tring-spin{from{transform:rotateX(-8deg) rotateY(0)} to{transform:rotateX(-8deg) rotateY(360deg)}}
+.tword{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:30px; font-weight:700; color:var(--orange-brand); backface-visibility:hidden;
+  text-shadow:0 0 18px rgba(255,121,0,.5)}
+
+/* ============================================================
+   15 · 3D PERSPECTIVE TUNNEL (finale)
+   ============================================================ */
+.tunnel-scene{perspective:600px; width:100%; height:420px; position:relative; overflow:hidden}
+.tunnel{position:absolute; inset:0; transform-style:preserve-3d}
+.tunnel .ring-q{
+  position:absolute; top:50%; left:50%; width:340px; height:340px; margin:-170px 0 0 -170px;
+  border:2px solid var(--orange-brand); border-radius:18px;
+  animation:tunnel-fly 4s infinite linear;
+  box-shadow:0 0 30px rgba(255,121,0,.35);
+}
+@keyframes tunnel-fly{
+  from{transform:translateZ(-2400px) rotate(0); opacity:0}
+  12%{opacity:1}
+  90%{opacity:1}
+  to{transform:translateZ(150px) rotate(50deg); opacity:0}
+}
+
+/* ---- ALZLite · isometric landing-zone assembly ---- */
+.alz-scene{
+  position:relative; width:560px; max-width:90vw; height:460px;
+  display:flex; align-items:center; justify-content:center;
+  perspective:1500px;
+}
+/* soft ground glow */
+.alz-scene::before{
+  content:""; position:absolute; left:50%; top:62%; width:420px; height:170px;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(ellipse at center, rgba(255,121,0,.22), transparent 70%);
+  filter:blur(6px);
+}
+.alz-stack{
+  position:relative; width:360px; height:320px;
+  transform-style:preserve-3d;
+  transform:translateY(44px) rotateY(calc(var(--px,0)*16deg)) rotateX(calc(var(--py,0)*-7deg));
+  transition:transform .15s ease-out;
+}
+.alz-tier{
+  position:absolute; inset:0; margin:auto;
+  width:var(--w); height:var(--h);
+  border-radius:16px;
+  background:linear-gradient(135deg, rgba(56,48,42,.96), rgba(28,22,18,.96));
+  border:1.5px solid var(--edge, rgba(255,121,0,.5));
+  box-shadow:0 30px 50px -16px rgba(0,0,0,.85), inset 0 0 42px var(--glow, rgba(255,121,0,.10));
+  display:flex; align-items:center; justify-content:center;
+  backface-visibility:hidden;
+  --ty:calc(var(--t)*-74px); --tz:0px;
+  transform:translateY(var(--ty)) translateZ(var(--tz)) rotateX(64deg);
+  animation:alz-land 8s cubic-bezier(.2,.8,.25,1) infinite;
+  animation-delay:calc(var(--t)*.45s);
+}
+.alz-tier.alz-top{
+  background:linear-gradient(135deg, var(--orange-brand), #c85f00);
+  border-color:rgba(255,180,120,.9);
+  box-shadow:0 26px 50px -16px rgba(0,0,0,.8), 0 0 40px rgba(255,121,0,.45), inset 0 0 30px rgba(255,255,255,.18);
+}
+.alz-label{ text-align:center; pointer-events:none }
+.alz-label .k{ display:block; font-weight:700; color:#fff; font-size:clamp(15px,1.5vw,19px) }
+.alz-label .s{ display:block; margin-top:3px; font-size:11.5px; letter-spacing:.05em; color:var(--orange-brand) }
+.alz-top .alz-label .k{ color:#1a1206 } .alz-top .alz-label .s{ color:#3a2300 }
+.alz-pillwrap{ text-align:center; margin:22px 0 -8px; min-height:36px }
+.alz-pill{
+  display:inline-block; opacity:1;
+  padding:9px 20px; border-radius:999px;
+  background:var(--orange-brand); color:#1a1206; font-weight:800;
+  font-size:15px; letter-spacing:.06em; white-space:nowrap;
+  border:1px solid rgba(255,200,150,.7);
+  box-shadow:0 0 30px rgba(255,121,0,.7);
+  animation:alz-pop 1.2s cubic-bezier(.2,.8,.25,1) .5s both;
+}
+@keyframes alz-land{
+  0%  { transform:translateY(calc(var(--ty) - 150px)) translateZ(var(--tz)) rotateX(64deg); opacity:0 }
+  16% { opacity:1 }
+  30% { transform:translateY(var(--ty)) translateZ(var(--tz)) rotateX(64deg); opacity:1 }
+  86% { transform:translateY(var(--ty)) translateZ(var(--tz)) rotateX(64deg); opacity:1 }
+  100%{ transform:translateY(calc(var(--ty) - 150px)) translateZ(var(--tz)) rotateX(64deg); opacity:0 }
+}
+@keyframes alz-pop{
+  0%  { opacity:0; transform:translateY(12px) scale(.82) }
+  70% { opacity:1; transform:translateY(0) scale(1.06) }
+  100%{ opacity:1; transform:translateY(0) scale(1) }
+}
+
+/* ---- AI-assisted engineering · team↔AI constellation ---- */
+.cons-scene{ position:relative; width:820px; max-width:94vw; height:420px; perspective:1300px; }
+.cons-3d{
+  position:absolute; inset:0; transform-style:preserve-3d;
+  transform:rotateY(calc(var(--px,0)*11deg)) rotateX(calc(var(--py,0)*-8deg));
+  transition:transform .15s ease-out;
+}
+.cons-svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible }
+.cons-link{ fill:none; stroke:rgba(255,121,0,.30); stroke-width:1.5 }
+.cons-link.flow{ stroke-dasharray:2 9; animation:cons-flow 1.3s linear infinite }
+.cons-link.claude{ stroke:rgba(168,133,216,.6); stroke-width:2.4; animation-duration:.9s }
+@keyframes cons-flow{ to{ stroke-dashoffset:-44 } }
+.cons-node{
+  position:absolute; transform:translate(-50%,-50%); width:16px; height:16px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #ffd9b0, var(--orange-brand));
+  box-shadow:0 0 12px rgba(255,121,0,.6);
+  animation:cons-float 4s ease-in-out infinite; animation-delay:var(--d,0s);
+}
+.cons-node.senior{
+  width:28px; height:28px; border:2px solid #d3bdf0;
+  background:radial-gradient(circle at 35% 30%, #efe2ff, var(--orange-purple));
+  box-shadow:0 0 20px rgba(168,133,216,.85);
+}
+@keyframes cons-float{ 0%,100%{ margin-top:0 } 50%{ margin-top:-7px } }
+.cons-core{ position:absolute; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; z-index:3 }
+.cons-core::before{ content:""; width:48px; height:48px; border-radius:50%; }
+.cons-core.cop::before{ background:radial-gradient(circle at 35% 30%, #ffe2c6, var(--orange-brand)); box-shadow:0 0 34px rgba(255,121,0,.85); animation:cons-pulse 2.6s ease-in-out infinite }
+.cons-core.cla::before{ background:radial-gradient(circle at 35% 30%, #efe2ff, var(--orange-purple)); box-shadow:0 0 34px rgba(168,133,216,.9); animation:cons-pulse 2.6s ease-in-out infinite .7s }
+.cons-core .cl{ margin-top:9px; font-size:12px; font-weight:700; color:#fff; white-space:nowrap; text-shadow:0 1px 6px #000 }
+@keyframes cons-pulse{ 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.14) } }
+.badge.claude{ border-color:rgba(168,133,216,.6); color:#cdb6ef }
+.cons-lead{ text-align:center; margin:6px auto 2px; max-width:760px; font-size:18px; color:var(--ink-soft) }
+.cons-lead b{ color:var(--orange-brand); font-weight:700 }
+
+/* ---- Transit microservices · bus route ---- */
+.bus-scene{ position:relative; width:900px; max-width:94vw; height:300px; perspective:1100px; }
+.bus-3d{
+  position:absolute; inset:0; transform-style:preserve-3d;
+  transform:rotateX(calc(16deg + var(--py,0)*-7deg)) rotateZ(calc(var(--px,0)*-4deg));
+  transition:transform .15s ease-out;
+}
+.bus-track{
+  position:absolute; left:6%; right:6%; top:56%; height:7px; border-radius:7px;
+  background:linear-gradient(90deg, rgba(255,121,0,.12), rgba(255,121,0,.5) 50%, rgba(255,121,0,.12));
+  box-shadow:0 0 22px rgba(255,121,0,.25); transform-style:preserve-3d;
+}
+.bus-track::before{
+  content:""; position:absolute; left:0; right:0; top:50%; height:2px; transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg, #fff 0 16px, transparent 16px 34px); opacity:.22;
+}
+.bus-stop{
+  position:absolute; top:50%; left:calc(var(--f)*100%); --dim:#6b635c;
+  width:18px; height:18px; border-radius:50%; background:var(--dim);
+  transform:translate(-50%,-50%);
+  animation:stoplight 9s linear infinite; animation-delay:calc((var(--f) - 0.08)*9s);
+}
+.bus-stop .lbl{
+  position:absolute; bottom:26px; left:50%; transform:translateX(-50%);
+  font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--ink-soft); white-space:nowrap;
+}
+.bus{
+  position:absolute; top:50%; left:0; width:86px; height:48px;
+  transform:translate(-50%,-88%); animation:bus-drive 9s linear infinite; z-index:4;
+}
+.bus-body{
+  position:absolute; left:0; right:0; top:0; bottom:9px; border-radius:13px 16px 9px 9px;
+  background:linear-gradient(180deg, #ff9a3d, var(--orange-brand));
+  border:1px solid rgba(255,205,160,.55);
+  box-shadow:0 10px 20px rgba(0,0,0,.5), inset 0 -6px 10px rgba(0,0,0,.18);
+}
+.bus-body::before{
+  content:""; position:absolute; left:8px; right:13px; top:8px; height:13px; border-radius:4px;
+  background:repeating-linear-gradient(90deg, #cdeeff 0 11px, rgba(255,121,0,.0) 11px 15px);
+}
+.bus-tag{ position:absolute; right:7px; bottom:3px; font-size:9px; font-weight:800; color:#1a1206; letter-spacing:.02em }
+.bus-wheel{
+  position:absolute; bottom:0; width:15px; height:15px; border-radius:50%;
+  background:#1c1c1c; border:2px solid #5a5a5a; animation:wheel-spin .5s linear infinite;
+}
+.bus-wheel::after{ content:""; position:absolute; inset:4px; border-radius:50%; background:#777 }
+.bus-wheel.w1{ left:13px } .bus-wheel.w2{ right:15px }
+@keyframes bus-drive{
+  0%  { left:0%; opacity:0 }
+  6%  { opacity:1 }
+  94% { opacity:1 }
+  100%{ left:100%; opacity:0 }
+}
+@keyframes wheel-spin{ to{ transform:rotate(360deg) } }
+@keyframes stoplight{
+  0%,5%   { background:var(--dim); box-shadow:none; transform:translate(-50%,-50%) scale(1) }
+  8%      { background:var(--orange-brand); box-shadow:0 0 18px rgba(255,121,0,.85); transform:translate(-50%,-50%) scale(1.45) }
+  12%,90% { background:var(--orange-brand); box-shadow:0 0 12px rgba(255,121,0,.7); transform:translate(-50%,-50%) scale(1.12) }
+  100%    { background:var(--dim); box-shadow:none; transform:translate(-50%,-50%) scale(1) }
+}
+
+/* ---- Claude Pilot · cockpit gauges dashboard ---- */
+.dash-scene{ position:relative; width:860px; max-width:94vw; height:330px; perspective:1200px; display:flex; align-items:center; justify-content:center }
+.dash-panel{
+  width:100%; border-radius:18px; padding:22px 26px 26px;
+  background:linear-gradient(180deg, rgba(30,26,34,.94), rgba(17,15,21,.96));
+  border:1px solid rgba(168,133,216,.42);
+  box-shadow:0 32px 64px -22px rgba(0,0,0,.75), 0 0 46px rgba(168,133,216,.13);
+  transform-style:preserve-3d;
+  transform:rotateX(calc(9deg + var(--py,0)*-7deg)) rotateY(calc(var(--px,0)*9deg));
+  transition:transform .15s ease-out;
+}
+.dash-head{ display:flex; align-items:center; gap:9px; font-size:13px; font-weight:700; letter-spacing:.05em; color:#cdb6ef; margin-bottom:14px }
+.dash-head .dot{ width:8px; height:8px; border-radius:50%; background:var(--orange-green); box-shadow:0 0 9px var(--orange-green); animation:dash-blink 1.6s ease-in-out infinite }
+@keyframes dash-blink{ 0%,100%{ opacity:1 } 50%{ opacity:.25 } }
+.gauges{ display:flex; justify-content:space-around; gap:18px }
+.gauge-w{ position:relative; width:122px; text-align:center; --c:314.16 }
+.gauge-w svg{ width:122px; height:122px; display:block }
+.gauge-w .track{ fill:none; stroke:rgba(255,255,255,.10); stroke-width:10 }
+.gauge-w .fill{
+  fill:none; stroke:var(--gc, var(--orange-brand)); stroke-width:10; stroke-linecap:round;
+  stroke-dasharray:var(--c); stroke-dashoffset:calc(var(--c) * (1 - var(--pct)));
+  transform-box:fill-box; transform-origin:center; transform:rotate(-90deg);
+  animation:gauge-fill 4.5s ease-out infinite; animation-delay:var(--gd,0s);
+}
+.gauge-w .g-val{ position:absolute; top:44px; left:0; right:0; font-size:25px; font-weight:800; color:#fff }
+.gauge-w .g-lbl{ margin-top:6px; font-size:12px; color:var(--ink-soft) }
+@keyframes gauge-fill{
+  0%   { stroke-dashoffset:var(--c) }
+  35%  { stroke-dashoffset:calc(var(--c) * (1 - var(--pct))) }
+  85%  { stroke-dashoffset:calc(var(--c) * (1 - var(--pct))) }
+  100% { stroke-dashoffset:var(--c) }
+}
+
+/* ---- Static web app helpers · two app windows ---- */
+.apps-scene{ position:relative; width:840px; max-width:95vw; height:300px; perspective:1400px; display:flex; align-items:center; justify-content:center }
+.apps-3d{
+  display:flex; gap:22px; transform-style:preserve-3d;
+  transform:rotateY(calc(var(--px,0)*8deg)) rotateX(calc(var(--py,0)*-6deg));
+  transition:transform .15s ease-out;
+}
+.appwin{ width:392px; border-radius:12px; overflow:hidden; background:#14121a; border:1px solid rgba(255,255,255,.12); box-shadow:0 30px 60px -24px rgba(0,0,0,.85) }
+.win-bar{ display:flex; align-items:center; gap:8px; padding:8px 12px; background:rgba(255,255,255,.05); border-bottom:1px solid rgba(255,255,255,.08) }
+.win-dots{ display:flex; gap:5px } .win-dots i{ width:9px; height:9px; border-radius:50%; display:block }
+.win-dots i:nth-child(1){ background:#ff5f57 } .win-dots i:nth-child(2){ background:#febc2e } .win-dots i:nth-child(3){ background:#28c840 }
+.win-title{ font-size:11px; font-weight:700; color:#cfcfd6 }
+.win-chip{ margin-left:auto; font-size:9px; padding:3px 8px; border-radius:6px; background:rgba(255,121,0,.16); color:var(--orange-brand); border:1px solid rgba(255,121,0,.4) }
+.win-body{ position:relative; height:236px; overflow:hidden }
+.win-body.vwan{ background:radial-gradient(130px 95px at 22% 72%, rgba(120,140,175,.12), transparent 70%), radial-gradient(150px 110px at 70% 44%, rgba(120,140,175,.14), transparent 72%), #0d1322 }
+.vwan-svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible }
+.vwan-svg .arc{ fill:none; stroke:rgba(75,180,230,.5); stroke-width:1.4 }
+.vwan-svg .arc-pulse{ fill:none; stroke:#a9def7; stroke-width:2.6; stroke-linecap:round; stroke-dasharray:6 9999; animation:arc-flow 2.3s linear infinite }
+@keyframes arc-flow{ from{ stroke-dashoffset:0 } to{ stroke-dashoffset:calc(var(--len,260)*-1px) } }
+.vwan .hub{ position:absolute; transform:translate(-50%,-50%); width:12px; height:12px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ffd9b0, var(--orange-brand)); box-shadow:0 0 12px rgba(255,121,0,.85); z-index:2 }
+.vwan .hub::before{ content:""; position:absolute; inset:-3px; border-radius:50%; border:2px solid rgba(255,121,0,.6); animation:hub-ring 2.6s ease-out infinite; animation-delay:var(--hd,0s) }
+@keyframes hub-ring{ 0%{ transform:scale(.5); opacity:.9 } 100%{ transform:scale(3.4); opacity:0 } }
+.vwan .hub-lbl{ position:absolute; top:13px; left:50%; transform:translateX(-50%); font-size:9px; color:#aeb6c2; white-space:nowrap; text-shadow:0 1px 4px #000 }
+.win-body.tree{ background:radial-gradient(circle at 50% 0%, rgba(75,120,200,.08), transparent 60%), #0f1018 }
+.tree-svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible }
+.tree-svg .tl{ stroke:rgba(255,255,255,.22); stroke-width:1.3; stroke-dasharray:200; stroke-dashoffset:0; animation:tree-draw 7s ease-out infinite; animation-delay:var(--d,0s) }
+@keyframes tree-draw{ 0%{ stroke-dashoffset:200 } 9%{ stroke-dashoffset:0 } 88%{ stroke-dashoffset:0 } 100%{ stroke-dashoffset:200 } }
+.tree .mg{ position:absolute; transform:translate(-50%,-50%); padding:4px 8px; border-radius:6px; opacity:1; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.2); color:#e9e9ee; font-size:9.5px; font-weight:600; white-space:nowrap; z-index:2; animation:mg-pop 7s ease-out infinite; animation-delay:var(--d,0s) }
+.tree .mg.root{ background:rgba(255,121,0,.18); border-color:rgba(255,121,0,.55); color:#ffd9b0 }
+.tree .mg.sub{ background:rgba(255,210,0,.12); border-color:rgba(255,210,0,.42); color:#ffe680; font-size:9px; padding:3px 7px }
+@keyframes mg-pop{ 0%{ opacity:0; transform:translate(-50%,-50%) scale(.8) } 7%{ opacity:1; transform:translate(-50%,-50%) scale(1.06) } 11%,88%{ opacity:1; transform:translate(-50%,-50%) scale(1) } 100%{ opacity:0; transform:translate(-50%,-50%) scale(.8) } }
+
+/* ---- Personal initiatives · three experiment tiles ---- */
+.exps-scene{ position:relative; width:822px; max-width:95vw; height:300px; perspective:1400px; display:flex; align-items:center; justify-content:center }
+.exps-3d{ display:flex; gap:18px; transform-style:preserve-3d; transform:rotateY(calc(var(--px,0)*7deg)) rotateX(calc(var(--py,0)*-5deg)); transition:transform .15s ease-out }
+.exp{ width:252px; border-radius:14px; overflow:hidden; background:linear-gradient(180deg, rgba(28,24,32,.95), rgba(15,13,19,.96)); border:1px solid rgba(255,255,255,.12); box-shadow:0 26px 50px -22px rgba(0,0,0,.82) }
+.exp-head{ display:flex; align-items:center; gap:8px; padding:11px 14px; font-size:13px; font-weight:700; color:#fff; border-bottom:1px solid rgba(255,255,255,.08) }
+.exp-ic{ width:10px; height:10px; border-radius:3px; display:block }
+.exp-ic.mcp{ background:var(--orange-brand); box-shadow:0 0 8px var(--orange-brand) }
+.exp-ic.agt{ background:var(--orange-purple); box-shadow:0 0 8px var(--orange-purple) }
+.exp-ic.mdl{ background:var(--orange-green); box-shadow:0 0 8px var(--orange-green) }
+.exp-body{ position:relative; height:168px; overflow:hidden }
+.exp-tag{ padding:9px 0; text-align:center; font-size:9.5px; color:var(--ink-soft); border-top:1px solid rgba(255,255,255,.06) }
+/* MCP */
+.mcp-svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible }
+.mcp-svg .ml{ stroke:rgba(255,121,0,.3); stroke-width:1.3; fill:none }
+.mcp-svg .ml.flow{ stroke-dasharray:4 8; stroke:#ffb066; animation:mcp-flow 1.2s linear infinite }
+@keyframes mcp-flow{ to{ stroke-dashoffset:-36 } }
+.mcp-hub{ position:absolute; left:50%; top:45.8%; transform:translate(-50%,-50%); width:42px; height:42px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ffd9b0, var(--orange-brand)); box-shadow:0 0 18px rgba(255,121,0,.8); display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#1a1206; z-index:2 }
+.mcp-tool{ position:absolute; transform:translate(-50%,-50%); padding:3px 7px; border-radius:6px; font-size:9px; font-weight:600; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); color:#dcdce2; z-index:2 }
+/* Hermes agents */
+.agt-zone{ position:absolute; left:14px; right:14px; top:14px; bottom:14px; border-radius:10px; border:1px dashed rgba(168,133,216,.4); background:rgba(168,133,216,.05) }
+.agt-shield{ position:absolute; top:8px; left:8px; font-size:9px; font-weight:700; color:#cdb6ef; padding:2px 7px; border-radius:5px; background:rgba(168,133,216,.16); border:1px solid rgba(168,133,216,.4) }
+.agt{ position:absolute; width:13px; height:13px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #efe2ff, var(--orange-purple)); box-shadow:0 0 10px rgba(168,133,216,.85) }
+.agt.a1{ left:20%; top:34%; animation:rove1 6s ease-in-out infinite }
+.agt.a2{ left:60%; top:62%; animation:rove2 7s ease-in-out infinite }
+.agt.a3{ left:42%; top:24%; animation:rove3 5.5s ease-in-out infinite }
+@keyframes rove1{ 0%,100%{ left:20%; top:34% } 25%{ left:68%; top:30% } 50%{ left:60%; top:66% } 75%{ left:26%; top:62% } }
+@keyframes rove2{ 0%,100%{ left:60%; top:62% } 30%{ left:30%; top:44% } 60%{ left:74%; top:38% } }
+@keyframes rove3{ 0%,100%{ left:42%; top:24% } 40%{ left:66%; top:56% } 70%{ left:30%; top:56% } }
+/* self-hosted models */
+.rack{ position:absolute; left:16px; right:16px; top:18px; display:flex; flex-direction:column; gap:12px }
+.bar .bl{ display:flex; justify-content:space-between; font-size:9px; color:#cfcfd6; margin-bottom:3px }
+.bar .bl span:last-child{ color:var(--ink-soft) }
+.bar .track{ height:7px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden }
+.bar .fill{ height:100%; border-radius:5px; width:var(--w,80%); background:linear-gradient(90deg, var(--orange-green), #7fe0ab); box-shadow:0 0 8px rgba(80,190,135,.5); animation:mdl-load 4.5s ease-out infinite; animation-delay:var(--md,0s) }
+@keyframes mdl-load{ 0%{ width:0 } 25%{ width:var(--w,80%) } 85%{ width:var(--w,80%) } 100%{ width:0 } }
+
+/* ---- Orange Brand Skill · brand kit → outputs ---- */
+.brand-scene{ position:relative; width:840px; max-width:95vw; height:300px; perspective:1400px; display:flex; align-items:center; justify-content:center }
+.brand-3d{ display:flex; align-items:center; gap:14px; transform-style:preserve-3d; transform:rotateY(calc(var(--px,0)*7deg)) rotateX(calc(var(--py,0)*-5deg)); transition:transform .15s ease-out }
+.bk-panel{ width:344px; border-radius:14px; padding:16px; background:linear-gradient(180deg, rgba(28,24,32,.95), rgba(15,13,19,.96)); border:1px solid rgba(255,255,255,.12); box-shadow:0 26px 50px -22px rgba(0,0,0,.8) }
+.bk-title{ font-size:12px; font-weight:700; letter-spacing:.05em; color:var(--orange-brand) }
+.swatches{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:12px 0 14px }
+.sw{ height:36px; border-radius:8px; position:relative; opacity:1; animation:sw-pop .5s ease-out var(--d,0s) both }
+.sw small{ position:absolute; bottom:3px; left:5px; font-size:7px; font-weight:800; color:rgba(0,0,0,.5) }
+@keyframes sw-pop{ 0%{ opacity:0; transform:scale(.55) } 100%{ opacity:1; transform:scale(1) } }
+.bk-bottom{ display:flex; align-items:center; gap:14px }
+.bk-logo{ width:52px; height:52px; object-fit:contain; border-radius:6px }
+.bk-type .aa{ font-size:34px; font-weight:700; color:#fff; line-height:1 }
+.bk-type .nm{ font-size:10px; color:var(--ink-soft); margin-top:2px }
+.bk-flow{ display:flex; gap:1px; color:var(--orange-brand); font-size:24px; font-weight:800; line-height:1 }
+.bk-flow i{ font-style:normal; animation:chev 1.2s ease-in-out infinite }
+.bk-flow i:nth-child(2){ animation-delay:.18s } .bk-flow i:nth-child(3){ animation-delay:.36s }
+@keyframes chev{ 0%,100%{ opacity:.25 } 50%{ opacity:1 } }
+.bk-outs{ position:relative; display:flex; flex-direction:column; gap:11px; width:300px }
+.doc{ border-radius:10px; overflow:hidden; background:rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.16); opacity:1; animation:doc-pop .5s ease-out var(--d,0s) both }
+.doc .dbar{ display:flex; align-items:center; height:20px; padding:0 9px; background:var(--orange-brand); font-size:9.5px; font-weight:800; color:#1a1206 }
+.doc .dbody{ padding:8px 10px }
+.doc .ln{ height:5px; border-radius:3px; background:rgba(255,255,255,.14); margin:5px 0 }
+.doc .ln.short{ width:58% }
+.doc.here{ box-shadow:0 0 0 1.5px var(--orange-brand), 0 0 22px rgba(255,121,0,.4); animation:doc-pop .5s ease-out var(--d,0s) both, here-glow 2s ease-in-out infinite }
+.here-tag{ margin-left:auto; font-size:8.5px; font-weight:800; color:#1a1206 }
+@keyframes doc-pop{ 0%{ opacity:0; transform:scale(.85) translateX(10px) } 100%{ opacity:1; transform:scale(1) translateX(0) } }
+@keyframes here-glow{ 0%,100%{ box-shadow:0 0 0 1.5px var(--orange-brand), 0 0 18px rgba(255,121,0,.3) } 50%{ box-shadow:0 0 0 1.5px var(--orange-brand), 0 0 30px rgba(255,121,0,.6) } }
+
+/* ---- Guardrails for vibe coding · shielded landing zone ---- */
+.lz-scene{ position:relative; width:560px; max-width:92vw; height:330px; perspective:1100px; display:flex; align-items:center; justify-content:center }
+.lz-stage{ position:relative; width:340px; height:320px; transform:rotateX(calc(var(--py,0)*-6deg)) rotateY(calc(var(--px,0)*8deg)); transition:transform .15s ease-out }
+.lz-ring{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:268px; height:268px; border-radius:50%; border:2px dashed rgba(255,121,0,.4); box-shadow:0 0 30px rgba(255,121,0,.15), inset 0 0 30px rgba(255,121,0,.08); animation:lz-spin 24s linear infinite }
+@keyframes lz-spin{ to{ transform:translate(-50%,-50%) rotate(360deg) } }
+.lz-pad{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:150px; height:150px; border-radius:50%; background:radial-gradient(circle, rgba(255,121,0,.2), rgba(255,121,0,.03) 70%); box-shadow:0 0 44px rgba(255,121,0,.28); display:flex; align-items:center; justify-content:center }
+.lz-app{ width:98px; border-radius:9px; overflow:hidden; background:rgba(20,18,24,.96); border:1px solid rgba(255,255,255,.2); box-shadow:0 8px 18px rgba(0,0,0,.5) }
+.lz-app-bar{ height:13px; background:var(--orange-brand) }
+.lz-app-body{ padding:7px 8px 4px; display:flex; flex-direction:column; gap:4px }
+.lz-app-body span{ height:4px; border-radius:2px; background:rgba(255,255,255,.18) } .lz-app-body span:last-child{ width:60% }
+.lz-app-lbl{ font-size:8px; text-align:center; color:var(--ink-soft); padding:0 0 6px }
+.lz-slot{ position:absolute; left:50%; top:50%; width:0; height:0; transform:rotate(var(--a)) translate(136px) rotate(calc(-1*var(--a))) }
+.lz-check{ position:absolute; transform:translate(-50%,-50%); display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px; white-space:nowrap; font-size:10px; font-weight:700; opacity:1; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.2); color:#cfcfd6; animation:lz-light 7s ease-out infinite; animation-delay:var(--d,0s) }
+.lz-check i{ font-style:normal; font-size:10px; color:#9fe7c1; opacity:1; animation:lz-tick 7s ease-out infinite; animation-delay:var(--d,0s) }
+@keyframes lz-light{
+  0%,4%   { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.2); color:#cfcfd6 }
+  9%      { background:rgba(80,190,135,.22); border-color:rgba(80,190,135,.75); color:#b8f0d3 }
+  13%,88% { background:rgba(80,190,135,.16); border-color:rgba(80,190,135,.6); color:#9fe7c1 }
+  100%    { background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.2); color:#cfcfd6 }
+}
+@keyframes lz-tick{ 0%,5%{ opacity:0; transform:scale(.3) } 10%{ opacity:1; transform:scale(1.3) } 14%,88%{ opacity:1; transform:scale(1) } 100%{ opacity:0; transform:scale(.3) } }
+.lz-safewrap{ text-align:center; margin-top:10px; min-height:34px }
+.lz-safe{ display:inline-block; padding:8px 18px; border-radius:999px; background:var(--orange-green); color:#06281a; font-weight:800; font-size:13px; box-shadow:0 0 24px rgba(80,190,135,.6); opacity:1; animation:lz-safe-pop 1s cubic-bezier(.2,.8,.25,1) 2.6s both }
+@keyframes lz-safe-pop{
+  0%  { opacity:0; transform:translateY(12px) scale(.82) }
+  70% { opacity:1; transform:translateY(0) scale(1.06) }
+  100%{ opacity:1; transform:translateY(0) scale(1) }
+}
+
+/* ---- Security audit · deep-reasoning magnifier ---- */
+.aud-scene{ position:relative; width:600px; max-width:94vw; height:300px; perspective:1300px; display:flex; align-items:center; justify-content:center }
+.aud-3d{ width:100%; transform-style:preserve-3d; transform:rotateY(calc(var(--px,0)*7deg)) rotateX(calc(var(--py,0)*-5deg)); transition:transform .15s ease-out }
+.aud-win{ border-radius:12px; overflow:hidden; background:#100e16; border:1px solid rgba(255,255,255,.12); box-shadow:0 30px 60px -24px rgba(0,0,0,.85) }
+.aud-bar{ display:flex; align-items:center; gap:8px; padding:8px 12px; background:rgba(255,255,255,.05); border-bottom:1px solid rgba(255,255,255,.08) }
+.aud-think{ margin-left:auto; display:flex; align-items:center; gap:4px; font-size:9.5px; font-weight:700; color:#cdb6ef }
+.aud-think i{ width:4px; height:4px; border-radius:50%; background:#cdb6ef; animation:aud-think-d 1.2s ease-in-out infinite }
+.aud-think i:nth-child(2){ animation-delay:.2s } .aud-think i:nth-child(3){ animation-delay:.4s }
+@keyframes aud-think-d{ 0%,100%{ opacity:.25 } 50%{ opacity:1 } }
+.aud-code{ position:relative; width:560px; height:230px; overflow:hidden }
+.aud-lines{ box-sizing:border-box; width:560px; padding:14px 16px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12.5px; line-height:1.95; color:#cfcfd6 }
+.aud-real{ position:absolute; left:0; top:0 }
+.aud-lines .cl{ display:flex; align-items:center; white-space:nowrap; border-radius:4px; padding:0 6px; height:24.4px }
+.aud-real .cl.find{ background:rgba(255,121,0,.06); box-shadow:inset 2px 0 0 rgba(255,121,0,.6) }
+.aud-lines .kw{ color:#c9a3ff } .aud-lines .str{ color:#7fe0ab } .aud-lines .num{ color:#ffb066 } .aud-lines .com{ color:#6b7280 } .aud-lines .fn{ color:#9fd9f5 }
+.sev{ margin-left:auto; font-size:9px; font-weight:800; padding:2px 7px; border-radius:5px; opacity:1; animation:sev-in .45s ease-out var(--fd,0s) both }
+.sev.high{ background:rgba(231,76,60,.2); color:#ff9286; border:1px solid rgba(231,76,60,.55) }
+.sev.med{ background:rgba(255,210,0,.16); color:#ffe680; border:1px solid rgba(255,210,0,.45) }
+.sev.low{ background:rgba(75,180,230,.16); color:#9fd9f5; border:1px solid rgba(75,180,230,.45) }
+@keyframes sev-in{ 0%{ opacity:0; transform:translateX(8px) scale(.8) } 100%{ opacity:1; transform:translateX(0) scale(1) } }
+.aud-zoom{ position:absolute; left:0; top:0; background:#0d0b12; transform:scale(1.9); transform-origin:150px 73px; clip-path:circle(33.7px at 150px 73px); animation:aud-zoom-move 5.5s ease-in-out infinite }
+.aud-lensring{ position:absolute; left:85px; top:8px; width:130px; height:130px; border-radius:50%; border:2px solid rgba(168,133,216,.85); box-shadow:0 0 28px rgba(168,133,216,.55), inset 0 0 22px rgba(168,133,216,.12); pointer-events:none; animation:aud-lens-move 5.5s ease-in-out infinite }
+.aud-lensring::after{ content:""; position:absolute; right:-13px; bottom:-9px; width:24px; height:6px; border-radius:4px; background:rgba(168,133,216,.9); transform:rotate(45deg); transform-origin:left center }
+@keyframes aud-lens-move{ 0%{ top:8px } 50%{ top:92px } 100%{ top:8px } }
+@keyframes aud-zoom-move{
+  0%  { transform-origin:150px 73px;  clip-path:circle(33.7px at 150px 73px) }
+  50% { transform-origin:150px 157px; clip-path:circle(33.7px at 150px 157px) }
+  100%{ transform-origin:150px 73px;  clip-path:circle(33.7px at 150px 73px) }
+}
+.aud-safewrap{ text-align:center; margin-top:10px; min-height:34px }
+.aud-safe{ display:inline-block; padding:8px 18px; border-radius:999px; background:var(--orange-green); color:#06281a; font-weight:800; font-size:13px; box-shadow:0 0 24px rgba(80,190,135,.6); opacity:1; animation:lz-safe-pop 1s cubic-bezier(.2,.8,.25,1) 3.6s both }
+
+/* ---- AI Foundry · models into private Azure enclave ---- */
+.foundry-scene{ position:relative; width:600px; max-width:94vw; height:320px; perspective:1300px; display:flex; align-items:center; justify-content:center }
+.foundry-3d{ display:flex; flex-direction:column; align-items:center; gap:10px; transform-style:preserve-3d; transform:rotateY(calc(var(--px,0)*8deg)) rotateX(calc(var(--py,0)*-6deg)); transition:transform .15s ease-out }
+.foundry-cat{ font-size:11px; font-weight:700; letter-spacing:.04em; color:var(--ink-soft) }
+.foundry-box{ width:460px; max-width:88vw; border-radius:16px; padding:0 0 16px; background:linear-gradient(180deg, rgba(20,30,44,.95), rgba(13,18,28,.96)); border:1.5px solid rgba(75,180,230,.5); box-shadow:0 26px 52px -22px rgba(0,0,0,.8), 0 0 36px rgba(75,180,230,.14); animation:fb-pulse 3.2s ease-in-out infinite }
+@keyframes fb-pulse{ 0%,100%{ box-shadow:0 26px 52px -22px rgba(0,0,0,.8), 0 0 30px rgba(75,180,230,.12) } 50%{ box-shadow:0 26px 52px -22px rgba(0,0,0,.8), 0 0 44px rgba(75,180,230,.28) } }
+.fb-head{ display:flex; align-items:center; gap:8px; padding:11px 14px; border-bottom:1px solid rgba(75,180,230,.22); font-size:12px; font-weight:700; color:#bfe3f6 }
+.fb-title{ white-space:nowrap }
+.fb-lock{ position:relative; width:11px; height:9px; border-radius:2px; background:#9fd9f5; flex:none; margin-top:5px }
+.fb-lock::before{ content:""; position:absolute; top:-6px; left:1.5px; width:6px; height:6px; border:2px solid #9fd9f5; border-bottom:0; border-radius:5px 5px 0 0 }
+.fb-badge{ margin-left:auto; font-size:9px; font-weight:800; padding:2px 8px; border-radius:999px; background:rgba(75,180,230,.18); color:#9fd9f5; border:1px solid rgba(75,180,230,.5) }
+.slots{ display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px 16px 0 }
+.model{ display:flex; align-items:center; justify-content:space-between; padding:10px 12px; border-radius:10px; background:rgba(255,255,255,.05); border:1px solid rgba(80,190,135,.5); box-shadow:0 0 12px rgba(80,190,135,.2); opacity:1; animation:model-dock .6s cubic-bezier(.2,.8,.25,1) var(--d,0s) both }
+.model .m-name{ font-size:13px; font-weight:700; color:#fff }
+.model .m-stat{ font-size:10px; font-weight:700; color:#9fe7c1 }
+.model.alt{ border-color:rgba(255,210,0,.45); box-shadow:0 0 12px rgba(255,210,0,.15) }
+.model.alt .m-stat{ color:#ffe680 }
+@keyframes model-dock{
+  0%  { opacity:0; transform:translateY(-46px) scale(.9); border-color:rgba(75,180,230,.4); box-shadow:none }
+  70% { opacity:1; transform:translateY(0) scale(1.04) }
+  100%{ opacity:1; transform:translateY(0) scale(1) }
+}
+.foundry-net{ font-size:10px; color:var(--ink-soft) }
+
+/* ============================================================
+   NAV CONTROLS
+   ============================================================ */
+.nav-arrow{
+  position:fixed; top:50%; transform:translateY(-50%); z-index:60;
+  width:54px; height:54px; border-radius:50%; cursor:pointer;
+  border:1px solid rgba(255,255,255,.22); background:rgba(20,20,24,.6);
+  -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+  color:#fff; font-size:24px; display:flex; align-items:center; justify-content:center;
+  transition:background .2s, border-color .2s, transform .15s;
+}
+.nav-arrow:hover{background:var(--orange-brand); border-color:var(--orange-brand)}
+.nav-arrow:active{transform:translateY(-50%) scale(.92)}
+.nav-arrow.prev{left:22px} .nav-arrow.next{right:22px}
+
+.dots{position:fixed; left:0; right:0; bottom:30px; z-index:60;
+  display:flex; gap:9px; justify-content:center; flex-wrap:wrap; padding:0 80px}
+.dot{width:9px; height:9px; border-radius:50%; background:rgba(255,255,255,.25); cursor:pointer; transition:all .2s; border:0; padding:0}
+.dot:hover{background:rgba(255,255,255,.55)}
+.dot.on{background:var(--orange-brand); width:26px; border-radius:5px}
+
+.progress{position:fixed; left:0; bottom:0; height:3px; background:var(--orange-brand); z-index:60;
+  width:0; transition:width .45s ease; box-shadow:0 0 12px var(--orange-brand)}
+
+/* reduced motion: calm the infinite loops */
+@media (prefers-reduced-motion: reduce){
+  .globe,.particle,.cube,.ring,.extrude,.fold,.panel,.ctrans,.cf-track,.tring,.tunnel .ring-q,.glass-bg span,.alz-tier,.alz-pill,.cons-node,.cons-core::before,.cons-link.flow,.bus,.bus-wheel,.bus-stop,.gauge-w .fill,.dash-head .dot,.arc-pulse,.vwan .hub::before,.tree .mg,.tree-svg .tl,.mcp-svg .ml.flow,.agt,.bar .fill,.sw,.doc,.doc.here,.bk-flow i,.lz-ring,.lz-check,.lz-check i,.lz-safe,.aud-lens,.aud-zoom,.aud-lensring,.sev,.aud-think i,.aud-safe,.model,.foundry-box{animation:none !important}
+  .slide{transition:opacity .2s !important}
+}
+@media (max-width:640px){
+  .topbar .deckname{display:none}
+  .nav-arrow{width:46px;height:46px}
+}
+
+/* capture mode (?shot=N) — clean frames for screenshots */
+body.capturing .nav-arrow,body.capturing .dots,body.capturing .progress{display:none}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="topbar">
+  <img class="brand-logo" alt="Orange"
+       src="https://brand.orange.com/themes/custom/slimline/assets/images/logos/Master_Logo_RGB.png">
+  <div class="titleblock">
+    <p class="kicker">Gen AI Initiative</p>
+    <p class="deckname">Cloud Engineering Faction · Initiatives</p>
+  </div>
+  <div class="spacer"></div>
+  <div class="counter">
+    <div class="big"><b id="cur">00</b> / 11</div>
+    <div class="lbl" id="effname">Cover</div>
+  </div>
+</header>
+
+<main id="deck">
+
+  <!-- ===== COVER (index 0) ===== -->
+  <section class="slide cover" data-name="Cover">
+    <div class="ribbon">Orange Business · Gen AI Initiative</div>
+    <h1>Cloud Engineering Faction<br><span class="hl">Gen AI</span> Initiatives.</h1>
+    <p>Initiatives &amp; progress from the Cloud Engineering Faction in the Orange Business Gen AI initiative.</p>
+    <div class="hint">Navigate with <kbd>←</kbd> <kbd>→</kbd> · or use the arrows &amp; dots</div>
+  </section>
+
+  <!-- ===== 1 · PARTICLE GLOBE (centerpiece) ===== -->
+  <section class="slide" id="globe-slide" data-name="Particle Globe" data-effect="1">
+    <p class="eyebrow">All initiatives · Overview</p>
+    <h2>All Cloud Engineering AI initiatives</h2>
+    <div class="stage"><div class="globe-scene"><div class="globe" id="globe"></div></div></div>
+    <p class="howto">Each <b>bright</b> node is one initiative. Hover to name it — the globe halts and a label appears; click to jump to that initiative's slide.</p>
+    <div class="badges"><span class="badge med">Hub</span><span class="badge src">Click a node to explore</span></div>
+  </section>
+
+  <!-- ===== 2 · CARD FLIP ===== -->
+  <section class="slide" data-name="ALZLite — Cloud Foundation" data-effect="2">
+    <p class="eyebrow">Cloud Foundation · Initiative 01</p>
+    <h2>ALZLite — Azure Landing Zones in &lt; 10 days</h2>
+    <p class="cons-lead">Project on the bench deployed on the <b>LabX tenant</b>.</p>
+    <div class="alz-pillwrap"><span class="alz-pill">DEPLOYED IN &lt; 10 DAYS</span></div>
+    <div class="stage">
+      <div class="alz-scene" data-tilt>
+        <div class="alz-stack">
+          <div class="alz-tier" style="--t:0;--w:384px;--h:300px;--edge:rgba(143,143,143,.6);--glow:rgba(143,143,143,.10)">
+            <div class="alz-label"><span class="k">Management Groups</span><span class="s">Policy · RBAC</span></div>
+          </div>
+          <div class="alz-tier" style="--t:1;--w:336px;--h:264px;--edge:rgba(75,180,230,.65);--glow:rgba(75,180,230,.12)">
+            <div class="alz-label"><span class="k">Platform</span><span class="s">Identity · Management</span></div>
+          </div>
+          <div class="alz-tier" style="--t:2;--w:288px;--h:228px;--edge:rgba(168,133,216,.65);--glow:rgba(168,133,216,.12)">
+            <div class="alz-label"><span class="k">Connectivity</span><span class="s">Hub network</span></div>
+          </div>
+          <div class="alz-tier alz-top" style="--t:3;--w:240px;--h:192px">
+            <div class="alz-label"><span class="k">Landing Zones</span><span class="s">Corp · Online</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="howto">Bench <b>Cloud Foundation Framework</b> — the ALZLite starter kit stands up a full Azure Landing Zone in under 10 days. Built with <b>GitHub Copilot</b> &amp; <b>Terraform</b>. Move the cursor to rotate the stack.</p>
+    <div class="badges"><span class="badge hard">Terraform</span><span class="badge src">GitHub Copilot</span><span class="badge med">Azure</span></div>
+  </section>
+
+  <!-- ===== 3 · AI-ASSISTED ENGINEERING (constellation) ===== -->
+  <section class="slide" data-name="AI-Assisted Engineering" data-effect="3">
+    <p class="eyebrow">Adoption · Initiative 02</p>
+    <h2>AI-Assisted Engineering</h2>
+    <p class="cons-lead">All team members use a coding assistant on a <b>daily basis</b>.</p>
+    <div class="stage">
+      <div class="cons-scene" data-tilt><div class="cons-3d" id="cons"></div></div>
+    </div>
+    <p class="howto">Every developer onboarded to <b>GitHub Copilot</b>; 3 senior engineers piloting <b>Claude</b>. Each pulse is an AI suggestion streaming to a teammate as they code.</p>
+    <div class="badges"><span class="badge hard">GitHub Copilot · all 12</span><span class="badge claude">Claude Pilot · 3</span><span class="badge src">100% onboarded</span></div>
+  </section>
+
+  <!-- ===== 4 · TRANSIT MICROSERVICES (bus route) ===== -->
+  <section class="slide" data-name="Transit Microservices" data-effect="4">
+    <p class="eyebrow">Delivery · Initiative 03</p>
+    <h2>Transit Microservices</h2>
+    <p class="cons-lead">IaC and .NET microservices designed with <b>Claude</b>.</p>
+    <div class="stage">
+      <div class="bus-scene" data-tilt>
+        <div class="bus-3d">
+          <div class="bus-track">
+            <div class="bus-stop" style="--f:.10"><span class="lbl">Auth</span></div>
+            <div class="bus-stop" style="--f:.26"><span class="lbl">Routes</span></div>
+            <div class="bus-stop" style="--f:.42"><span class="lbl">Tickets</span></div>
+            <div class="bus-stop" style="--f:.58"><span class="lbl">Fleet</span></div>
+            <div class="bus-stop" style="--f:.74"><span class="lbl">Schedules</span></div>
+            <div class="bus-stop" style="--f:.90"><span class="lbl">Payments</span></div>
+            <div class="bus">
+              <div class="bus-body"><span class="bus-tag">.NET</span></div>
+              <div class="bus-wheel w1"></div>
+              <div class="bus-wheel w2"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="howto">A cloud-native platform for a public transport operator — infrastructure-as-code and .NET microservices, architected with <b>Claude</b>. Each stop on the line is a service.</p>
+    <div class="badges"><span class="badge med">.NET</span><span class="badge hard">IaC</span><span class="badge claude">built with Claude</span></div>
+  </section>
+
+  <!-- ===== 5 · CLAUDE PILOT (cockpit gauges) ===== -->
+  <section class="slide" data-name="Claude Pilot" data-effect="5">
+    <p class="eyebrow">Enablement · Initiative 04</p>
+    <h2>Claude Pilot</h2>
+    <p class="cons-lead">Supported initiative setup, deployed <b>telemetry &amp; a usage dashboard</b>.</p>
+    <div class="stage">
+      <div class="dash-scene" data-tilt>
+        <div class="dash-panel">
+          <div class="dash-head"><span class="dot"></span> Claude Pilot · usage telemetry</div>
+          <div class="gauges">
+            <div class="gauge-w" style="--pct:.84;--gd:0s">
+              <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50"/><circle class="fill" cx="60" cy="60" r="50"/></svg>
+              <div class="g-val">84%</div><div class="g-lbl">Acceptance</div>
+            </div>
+            <div class="gauge-w" style="--pct:.92;--gd:.22s">
+              <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50"/><circle class="fill" cx="60" cy="60" r="50"/></svg>
+              <div class="g-val">92%</div><div class="g-lbl">Weekly active</div>
+            </div>
+            <div class="gauge-w" style="--pct:1;--gd:.44s;--gc:var(--orange-purple)">
+              <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50"/><circle class="fill" cx="60" cy="60" r="50"/></svg>
+              <div class="g-val">100%</div><div class="g-lbl">Onboarded</div>
+            </div>
+            <div class="gauge-w" style="--pct:.37;--gd:.66s">
+              <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="50"/><circle class="fill" cx="60" cy="60" r="50"/></svg>
+              <div class="g-val">+37%</div><div class="g-lbl">Productivity</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="howto">Stood up the Claude pilot end-to-end — initiative setup, a telemetry pipeline, and a live usage dashboard tracking adoption and impact. Figures illustrative.</p>
+    <div class="badges"><span class="badge hard">Telemetry</span><span class="badge med">Usage dashboard</span><span class="badge claude">Claude</span></div>
+  </section>
+
+  <!-- ===== 6 · STATIC WEB APP HELPERS (two app windows) ===== -->
+  <section class="slide" data-name="Static Web App Helpers" data-effect="6">
+    <p class="eyebrow">Tooling · Initiative 05</p>
+    <h2>Static Web App Helpers</h2>
+    <p class="cons-lead">HTML / JavaScript apps that help build <b>architecture designs</b>.</p>
+    <div class="stage">
+      <div class="apps-scene" data-tilt>
+        <div class="apps-3d">
+          <div class="appwin">
+            <div class="win-bar"><span class="win-dots"><i></i><i></i><i></i></span><span class="win-title">vWAN Studio</span><span class="win-chip">Export .tf</span></div>
+            <div class="win-body vwan">
+              <svg class="vwan-svg" viewBox="0 0 392 236" preserveAspectRatio="none">
+                <path class="arc" d="M72,165 Q170,40 256,92"/>
+                <path class="arc" d="M72,165 Q185,55 308,128"/>
+                <path class="arc-pulse" style="--len:250" d="M72,165 Q170,40 256,92"/>
+                <path class="arc-pulse" style="--len:300;animation-delay:.8s" d="M72,165 Q185,55 308,128"/>
+              </svg>
+              <div class="hub" style="left:18.4%;top:69.9%"><span class="hub-lbl">Canada East</span></div>
+              <div class="hub" style="left:65.3%;top:39%;--hd:.5s"><span class="hub-lbl">West Europe</span></div>
+              <div class="hub" style="left:78.6%;top:54.2%;--hd:1s"><span class="hub-lbl">Germany WC</span></div>
+            </div>
+          </div>
+          <div class="appwin">
+            <div class="win-bar"><span class="win-dots"><i></i><i></i><i></i></span><span class="win-title">ALZ Foundations</span><span class="win-chip">Load reference</span></div>
+            <div class="win-body tree">
+              <svg class="tree-svg" viewBox="0 0 392 236" preserveAspectRatio="none">
+                <line class="tl" style="--d:.2s"  x1="196" y1="35" x2="113" y2="80"/>
+                <line class="tl" style="--d:.2s"  x1="196" y1="35" x2="279" y2="80"/>
+                <line class="tl" style="--d:.45s" x1="113" y1="80" x2="55"  y2="137"/>
+                <line class="tl" style="--d:.45s" x1="113" y1="80" x2="153" y2="137"/>
+                <line class="tl" style="--d:.45s" x1="279" y1="80" x2="239" y2="137"/>
+                <line class="tl" style="--d:.45s" x1="279" y1="80" x2="337" y2="137"/>
+                <line class="tl" style="--d:.7s"  x1="55"  y1="137" x2="55"  y2="193"/>
+                <line class="tl" style="--d:.7s"  x1="239" y1="137" x2="239" y2="193"/>
+                <line class="tl" style="--d:.7s"  x1="337" y1="137" x2="337" y2="193"/>
+              </svg>
+              <div class="mg root" style="left:50%;top:15%;--d:0s">Tenant root</div>
+              <div class="mg" style="left:28.8%;top:34%;--d:.3s">Platform</div>
+              <div class="mg" style="left:71.2%;top:34%;--d:.3s">Landing Zones</div>
+              <div class="mg" style="left:14%;top:58%;--d:.55s">Identity</div>
+              <div class="mg" style="left:39%;top:58%;--d:.55s">Connectivity</div>
+              <div class="mg" style="left:61%;top:58%;--d:.55s">Corp</div>
+              <div class="mg" style="left:86%;top:58%;--d:.55s">Online</div>
+              <div class="mg sub" style="left:14%;top:82%;--d:.8s">sub</div>
+              <div class="mg sub" style="left:61%;top:82%;--d:.8s">sub</div>
+              <div class="mg sub" style="left:86%;top:82%;--d:.8s">sub</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="howto">Self-built, framework-free web apps — a Virtual WAN topology designer (map → Terraform) and an Azure Landing Zone hierarchy builder. Pure HTML/JS, no backend.</p>
+    <div class="badges"><span class="badge hard">HTML / JS</span><span class="badge med">No framework</span><span class="badge src">Terraform export</span></div>
+  </section>
+
+  <!-- ===== 7 · ORANGE BRAND SKILL (brand kit → outputs) ===== -->
+  <section class="slide" data-name="Orange Brand Skill" data-effect="7">
+    <p class="eyebrow">Enablement · Initiative 06</p>
+    <h2>Orange Brand Skill</h2>
+    <p class="cons-lead">Shared skill to build on-brand presentations — <b>used here</b>.</p>
+    <div class="stage">
+      <div class="brand-scene" data-tilt>
+        <div class="brand-3d">
+          <div class="bk-panel">
+            <div class="bk-title">Brand tokens</div>
+            <div class="swatches">
+              <div class="sw" style="background:var(--orange-brand);--d:0s"><small>FF7900</small></div>
+              <div class="sw" style="background:var(--orange-accessible);--d:.07s"><small>F16E00</small></div>
+              <div class="sw" style="background:var(--orange-blue);--d:.14s"><small>4BB4E6</small></div>
+              <div class="sw" style="background:var(--orange-green);--d:.21s"><small>50BE87</small></div>
+              <div class="sw" style="background:var(--orange-purple);--d:.28s"><small>A885D8</small></div>
+              <div class="sw" style="background:var(--orange-yellow);--d:.35s"><small>FFD200</small></div>
+              <div class="sw" style="background:var(--orange-pink);--d:.42s"><small>FFB4E6</small></div>
+              <div class="sw" style="background:var(--orange-grey-mid);--d:.49s"><small>8F8F8F</small></div>
+            </div>
+            <div class="bk-bottom">
+              <img class="bk-logo" alt="Orange logo" src="https://brand.orange.com/themes/custom/slimline/assets/images/logos/Master_Logo_RGB.png">
+              <div class="bk-type"><div class="aa">Aa</div><div class="nm">Helvetica Neue</div></div>
+            </div>
+          </div>
+          <div class="bk-flow"><i>›</i><i>›</i><i>›</i></div>
+          <div class="bk-outs">
+            <div class="doc here" style="--d:.7s"><div class="dbar">HTML deck<span class="here-tag">● used here</span></div><div class="dbody"><div class="ln"></div><div class="ln short"></div></div></div>
+            <div class="doc" style="--d:.85s"><div class="dbar">Word · .docx</div><div class="dbody"><div class="ln"></div><div class="ln short"></div></div></div>
+            <div class="doc" style="--d:1s"><div class="dbar">PowerPoint · .pptx</div><div class="dbody"><div class="ln"></div><div class="ln short"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="howto">A reusable design skill — Orange brand tokens, typography and logo rules — that generates branded HTML, Word and PowerPoint. This deck was built with it.</p>
+    <div class="badges"><span class="badge hard">Design tokens</span><span class="badge med">Helvetica Neue</span><span class="badge src">HTML · DOCX · PPTX</span></div>
+  </section>
+
+  <!-- ===== 9 · GUARDRAILS FOR VIBE CODING (shielded landing zone) ===== -->
+  <section class="slide" data-name="Guardrails for Vibe Coding" data-effect="8">
+    <p class="eyebrow">Platform · Initiative 07</p>
+    <h2>Guardrails for Vibe Coding</h2>
+    <p class="cons-lead">Infrastructure &amp; validated tools so vibe-coded apps ship <b>secure &amp; safe</b>.</p>
+    <div class="stage">
+      <div class="lz-scene" data-tilt>
+        <div class="lz-stage">
+          <div class="lz-ring"></div>
+          <div class="lz-pad">
+            <div class="lz-app">
+              <div class="lz-app-bar"></div>
+              <div class="lz-app-body"><span></span><span></span></div>
+              <div class="lz-app-lbl">vibe-coded app</div>
+            </div>
+          </div>
+          <div class="lz-slot" style="--a:-90deg"><div class="lz-check" style="--d:.4s">Policy <i>✓</i></div></div>
+          <div class="lz-slot" style="--a:-18deg"><div class="lz-check" style="--d:.8s">Secrets <i>✓</i></div></div>
+          <div class="lz-slot" style="--a:54deg"><div class="lz-check" style="--d:1.2s">SCA <i>✓</i></div></div>
+          <div class="lz-slot" style="--a:126deg"><div class="lz-check" style="--d:1.6s">SAST <i>✓</i></div></div>
+          <div class="lz-slot" style="--a:198deg"><div class="lz-check" style="--d:2s">Cost <i>✓</i></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="lz-safewrap"><span class="lz-safe">✓ Safe to ship</span></div>
+    <p class="howto">A guarded landing zone for vibe-coded apps — pre-validated infrastructure, tools and policies. Every app clears the same guardrails before it ships.</p>
+    <div class="badges"><span class="badge hard">Landing zone</span><span class="badge med">Guardrails</span><span class="badge src">Vibe-coding</span></div>
+  </section>
+
+  <!-- ===== 10 · SECURITY AUDIT (deep-reasoning magnifier) ===== -->
+  <section class="slide" data-name="Security & Robustness Audit" data-effect="9">
+    <p class="eyebrow">Assurance · Initiative 08</p>
+    <h2>Security &amp; Robustness Audit</h2>
+    <p class="cons-lead">Claude dynamic workflows audit existing <b>code &amp; infrastructure</b> with deep reasoning.</p>
+    <div class="stage">
+      <div class="aud-scene" data-tilt>
+        <div class="aud-3d">
+          <div class="aud-win">
+            <div class="aud-bar"><span class="win-dots"><i></i><i></i><i></i></span><span class="win-title">audit · code + infrastructure</span><span class="aud-think">Claude · deep reasoning<i></i><i></i><i></i></span></div>
+            <div class="aud-code">
+              <div class="aud-lines aud-real">
+                <div class="cl"><span class="com"># main.tf · connectivity</span></div>
+                <div class="cl find"><span class="kw">resource</span> <span class="str">"storage"</span> {<span class="sev high" style="--fd:.7s">High</span></div>
+                <div class="cl">&nbsp;&nbsp;<span class="fn">public_access</span> = <span class="num">true</span></div>
+                <div class="cl find"><span class="kw">var</span> cn = <span class="str">"Server=…;Pwd=…"</span>;<span class="sev high" style="--fd:1.3s">High</span></div>
+                <div class="cl"><span class="kw">catch</span> (<span class="fn">Exception</span>) { }<span class="sev med" style="--fd:1.9s">Med</span></div>
+                <div class="cl find"><span class="fn">nsg_rule</span> = <span class="str">"0.0.0.0/0"</span><span class="sev med" style="--fd:2.5s">Med</span></div>
+                <div class="cl">db.<span class="fn">Query</span>(<span class="num">userInput</span>);<span class="sev low" style="--fd:3.1s">Low</span></div>
+                <div class="cl"><span class="fn">app</span>.UseHttpsRedirection();</div>
+              </div>
+              <div class="aud-lines aud-zoom">
+                <div class="cl"><span class="com"># main.tf · connectivity</span></div>
+                <div class="cl"><span class="kw">resource</span> <span class="str">"storage"</span> {</div>
+                <div class="cl">&nbsp;&nbsp;<span class="fn">public_access</span> = <span class="num">true</span></div>
+                <div class="cl"><span class="kw">var</span> cn = <span class="str">"Server=…;Pwd=…"</span>;</div>
+                <div class="cl"><span class="kw">catch</span> (<span class="fn">Exception</span>) { }</div>
+                <div class="cl"><span class="fn">nsg_rule</span> = <span class="str">"0.0.0.0/0"</span></div>
+                <div class="cl">db.<span class="fn">Query</span>(<span class="num">userInput</span>);</div>
+                <div class="cl"><span class="fn">app</span>.UseHttpsRedirection();</div>
+              </div>
+              <div class="aud-lensring"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="aud-safewrap"><span class="aud-safe">✓ Audited &amp; hardened</span></div>
+    <p class="howto">Multi-step Claude workflows reason over the codebase and infrastructure, surfacing security and robustness findings by severity — then verifying the fixes.</p>
+    <div class="badges"><span class="badge claude">Deep reasoning</span><span class="badge hard">Dynamic workflows</span><span class="badge src">Code + infra</span></div>
+  </section>
+
+  <!-- ===== 11 · AI FOUNDRY (models into private Azure enclave) ===== -->
+  <section class="slide" data-name="AI Foundry" data-effect="10">
+    <p class="eyebrow">Ambition · Initiative 09</p>
+    <h2>AI Foundry</h2>
+    <p class="cons-lead">Accelerate Azure AI Foundry so enterprises host AI models <b>privately in Azure</b>.</p>
+    <div class="stage">
+      <div class="foundry-scene" data-tilt>
+        <div class="foundry-3d">
+          <div class="foundry-cat">Azure AI Foundry · model catalog ↓</div>
+          <div class="foundry-box">
+            <div class="fb-head"><span class="fb-lock"></span><span class="fb-title">Private Azure · enterprise tenant</span><span class="fb-badge">Private</span></div>
+            <div class="slots">
+              <div class="model" style="--d:.4s"><span class="m-name">Llama 3</span><span class="m-stat">hosted</span></div>
+              <div class="model" style="--d:.8s"><span class="m-name">Mistral</span><span class="m-stat">hosted</span></div>
+              <div class="model" style="--d:1.2s"><span class="m-name">Phi-3</span><span class="m-stat">hosted</span></div>
+              <div class="model alt" style="--d:1.6s"><span class="m-name">+ catalog</span><span class="m-stat">ready</span></div>
+            </div>
+          </div>
+          <div class="foundry-net">Private endpoints · no public internet</div>
+        </div>
+      </div>
+    </div>
+    <p class="howto">The ambition: stand up Azure AI Foundry fast for enterprises — deploying open and frontier models into a private Azure tenant, with no exposure to the public internet.</p>
+    <div class="badges"><span class="badge src">Azure AI Foundry</span><span class="badge hard">Private hosting</span><span class="badge med">Enterprise</span></div>
+  </section>
+
+  <!-- ===== 11 · PERSONAL INITIATIVES (three experiment tiles) ===== -->
+  <section class="slide" data-name="Personal Initiatives" data-effect="11">
+    <p class="eyebrow">Side projects · Initiative 10</p>
+    <h2>Personal Initiatives</h2>
+    <p class="cons-lead">Experiments by team members on their <b>free time</b>.</p>
+    <div class="stage">
+      <div class="exps-scene" data-tilt>
+        <div class="exps-3d">
+
+          <div class="exp">
+            <div class="exp-head"><span class="exp-ic mcp"></span> MCP Gateway</div>
+            <div class="exp-body">
+              <svg class="mcp-svg" viewBox="0 0 252 168" preserveAspectRatio="none">
+                <line class="ml flow" x1="126" y1="77" x2="44" y2="40"/>
+                <line class="ml flow" x1="126" y1="77" x2="208" y2="40" style="animation-delay:.3s"/>
+                <line class="ml flow" x1="126" y1="77" x2="44" y2="128" style="animation-delay:.6s"/>
+                <line class="ml flow" x1="126" y1="77" x2="208" y2="128" style="animation-delay:.9s"/>
+              </svg>
+              <div class="mcp-hub">MCP</div>
+              <div class="mcp-tool" style="left:17.5%;top:23.8%">DB</div>
+              <div class="mcp-tool" style="left:82.5%;top:23.8%">API</div>
+              <div class="mcp-tool" style="left:17.5%;top:76.2%">Git</div>
+              <div class="mcp-tool" style="left:82.5%;top:76.2%">Files</div>
+            </div>
+            <div class="exp-tag">Many tools · one endpoint</div>
+          </div>
+
+          <div class="exp">
+            <div class="exp-head"><span class="exp-ic agt"></span> Hermes Agents</div>
+            <div class="exp-body">
+              <div class="agt-zone">
+                <span class="agt-shield">Sovereign</span>
+                <span class="agt a1"></span><span class="agt a2"></span><span class="agt a3"></span>
+              </div>
+            </div>
+            <div class="exp-tag">Autonomous · Scaleway cloud</div>
+          </div>
+
+          <div class="exp">
+            <div class="exp-head"><span class="exp-ic mdl"></span> Self-hosted Models</div>
+            <div class="exp-body">
+              <div class="rack">
+                <div class="bar" style="--w:92%;--md:0s"><div class="bl"><span>Llama 3</span><span>70B</span></div><div class="track"><div class="fill"></div></div></div>
+                <div class="bar" style="--w:78%;--md:.3s"><div class="bl"><span>Mistral</span><span>7B</span></div><div class="track"><div class="fill"></div></div></div>
+                <div class="bar" style="--w:85%;--md:.6s"><div class="bl"><span>Qwen2</span><span>32B</span></div><div class="track"><div class="fill"></div></div></div>
+                <div class="bar" style="--w:64%;--md:.9s"><div class="bl"><span>Gemma</span><span>9B</span></div><div class="track"><div class="fill"></div></div></div>
+              </div>
+            </div>
+            <div class="exp-tag">Open-source · self-hosted</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <p class="howto">Nights-and-weekends R&amp;D — an MCP gateway, autonomous Hermes agents on sovereign cloud (Scaleway), and self-hosted open-source models.</p>
+    <div class="badges"><span class="badge hard">MCP</span><span class="badge claude">Agents</span><span class="badge easy">Self-hosted LLMs</span></div>
+  </section>
+
+  <!-- ===== CLOSING ===== -->
+  <section class="slide cover" data-name="Thank you">
+    <div class="ribbon">Cloud Engineering Faction · Orange Business</div>
+    <h1>Built by<br>the <span class="hl">Faction</span>.</h1>
+    <p>Cloud Engineering · Orange Business Gen AI initiative. Thanks for watching.</p>
+    <div class="hint"><kbd>←</kbd> back to the start anytime</div>
+  </section>
+
+</main>
+
+<!-- NAV -->
+<button class="nav-arrow prev" id="prev" aria-label="Previous">‹</button>
+<button class="nav-arrow next" id="next" aria-label="Next">›</button>
+<div class="dots" id="dots"></div>
+<div class="progress" id="bar"></div>
+
+<script>
+(function(){
+  "use strict";
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var idx = 0, last = slides.length - 1;
+  var curEl = document.getElementById('cur');
+  var nameEl = document.getElementById('effname');
+  var bar = document.getElementById('bar');
+  var dotsWrap = document.getElementById('dots');
+
+  /* ---- build dots ---- */
+  slides.forEach(function(s,i){
+    var b = document.createElement('button');
+    b.className = 'dot'; b.setAttribute('aria-label','Go to slide '+(i+1));
+    b.addEventListener('click', function(){ go(i); });
+    dotsWrap.appendChild(b);
+  });
+  var dots = Array.prototype.slice.call(dotsWrap.children);
+
+  function render(prev){
+    slides.forEach(function(s,i){
+      s.classList.remove('active','leaving-left','leaving-right');
+      if(i === idx){ s.classList.add('active'); }
+      else if(i === prev){ s.classList.add(idx > prev ? 'leaving-left' : 'leaving-right'); }
+    });
+    dots.forEach(function(d,i){ d.classList.toggle('on', i === idx); });
+    var eff = slides[idx].getAttribute('data-effect');
+    curEl.textContent = eff ? (eff.length < 2 ? '0'+eff : eff) : '00';
+    nameEl.textContent = slides[idx].getAttribute('data-name') || '';
+    bar.style.width = (idx/last*100) + '%';
+  }
+  function go(n){
+    var prev = idx;
+    idx = (n < 0) ? last : (n > last ? 0 : n);
+    if(idx === prev) return;
+    render(prev);
+  }
+  function next(){ go(idx+1); }
+  function prevSlide(){ go(idx-1); }
+
+  document.getElementById('next').addEventListener('click', next);
+  document.getElementById('prev').addEventListener('click', prevSlide);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowRight' || e.key === 'PageDown'){ next(); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ prevSlide(); }
+    else if(e.key === ' '){ e.preventDefault(); next(); }
+    else if(e.key === 'Home'){ go(0); }
+    else if(e.key === 'End'){ go(last); }
+  });
+
+  /* ---- touch swipe ---- */
+  var tx = 0;
+  document.addEventListener('touchstart', function(e){ tx = e.changedTouches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - tx;
+    if(Math.abs(dx) > 50){ dx < 0 ? next() : prevSlide(); }
+  }, {passive:true});
+
+  /* ---- pointer tilt: feeds --px/--py (-1..1) to [data-tilt] scenes ---- */
+  document.querySelectorAll('[data-tilt]').forEach(function(scene){
+    function move(e){
+      var r = scene.getBoundingClientRect();
+      var px = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      var py = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      scene.style.setProperty('--px', px.toFixed(3));
+      scene.style.setProperty('--py', py.toFixed(3));
+    }
+    function reset(){ scene.style.setProperty('--px',0); scene.style.setProperty('--py',0); }
+    scene.addEventListener('mousemove', move);
+    scene.addEventListener('mouseleave', reset);
+  });
+
+  /* ---- 4 · carousel ring panels ---- */
+  (function(){
+    var ring = document.getElementById('ring');
+    if(!ring) return;
+    var items = [['01','RAG Assistant','knowledge'],['02','Code Copilot','engineering'],
+      ['03','Summarizer','meetings'],['04','Prompt Studio','platform'],
+      ['05','Eval Harness','quality'],['06','Agents','automation'],
+      ['07','Guardrails','safety'],['08','Analytics','insight']];
+    var n = items.length, radius = 320;
+    items.forEach(function(it,i){
+      var p = document.createElement('div');
+      p.className = 'ring-panel';
+      p.style.transform = 'rotateY('+(i*(360/n))+'deg) translateZ('+radius+'px)';
+      p.innerHTML = '<div class="num">'+it[0]+'</div><h4>'+it[1]+'</h4><span>'+it[2]+'</span>';
+      ring.appendChild(p);
+    });
+  })();
+
+  /* ---- flip clock ---- */
+  (function(){
+    var cells = Array.prototype.slice.call(document.querySelectorAll('#clock .digit'));
+    var prevVals = ['','','','','',''];
+    function pad(n){ return n < 10 ? '0'+n : ''+n; }
+    function tick(){
+      var d = new Date();
+      var str = pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+      cells.forEach(function(c,i){
+        var v = str.charAt(i);
+        if(v !== prevVals[i]){
+          prevVals[i] = v;
+          c.textContent = v;
+          c.classList.remove('flip'); void c.offsetWidth; c.classList.add('flip');
+        }
+      });
+    }
+    tick(); setInterval(tick, 1000);
+  })();
+
+  /* ---- 1 · particle globe (centerpiece) ---- */
+  (function(){
+    var globe = document.getElementById('globe');
+    if(!globe) return;
+    var globeSlide = document.getElementById('globe-slide');
+    var sceneWrap = globe.parentNode;            // .globe-scene (position:relative)
+
+    // target effects = every effect slide except the globe itself
+    var targets = [];
+    slides.forEach(function(s,i){
+      if(s.dataset.effect && s !== globeSlide){ targets.push({i:i, name:s.dataset.name}); }
+    });
+
+    var TOTAL = 1350, R = 330;
+    var golden = Math.PI * (3 - Math.sqrt(5));   // golden angle
+    // spread the big interactive nodes evenly through the index range
+    var bigMap = {};
+    targets.forEach(function(t,j){ bigMap[Math.round(j * TOTAL / targets.length)] = t; });
+
+    for(var i=0;i<TOTAL;i++){
+      var y = 1 - (i/(TOTAL-1))*2;               // -1 .. 1
+      var rad = Math.sqrt(Math.max(0, 1 - y*y));
+      var th = i * golden;
+      var x = Math.cos(th)*rad, z = Math.sin(th)*rad;
+      var big = bigMap[i];
+      var p = document.createElement('div');
+      p.className = 'particle' + (big ? ' big' : '');
+      if(!big){
+        var sz = (3 + Math.random()*4);          // 3-7px decorative dots
+        p.style.width = p.style.height = sz.toFixed(1)+'px';
+        p.style.margin = (-sz/2).toFixed(1)+'px 0 0 '+(-sz/2).toFixed(1)+'px';
+        p.style.opacity = (0.4 + Math.random()*0.5).toFixed(2);
+      }
+      p.style.setProperty('--pos', 'translate3d('+(x*R).toFixed(1)+'px,'+(y*R).toFixed(1)+'px,'+(z*R).toFixed(1)+'px)');
+      if(big){
+        p.dataset.target = big.i;
+        p.dataset.title = big.name;
+        p.setAttribute('tabindex','0');
+        p.setAttribute('aria-label', big.name);
+        p.addEventListener('mouseenter', function(e){ showPop(e.currentTarget); });
+        p.addEventListener('focus', function(e){ showPop(e.currentTarget); });
+        p.addEventListener('click', function(e){ go(parseInt(e.currentTarget.dataset.target,10)); });
+        p.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(parseInt(e.currentTarget.dataset.target,10)); } });
+      }
+      globe.appendChild(p);
+    }
+
+    // shared popup (screen-space, child of .globe-scene)
+    var pop = document.createElement('div');
+    pop.className = 'globe-pop'; pop.style.display = 'none';
+    sceneWrap.appendChild(pop);
+    function showPop(el){
+      globe.classList.add('paused');
+      var sr = sceneWrap.getBoundingClientRect();
+      var er = el.getBoundingClientRect();
+      pop.style.left = (er.left + er.width/2 - sr.left) + 'px';
+      pop.style.top  = (er.top  + er.height/2 - sr.top) + 'px';
+      pop.innerHTML = '<span class="t">'+el.dataset.title+'</span><span class="c">click to view &rarr;</span>';
+      pop.dataset.target = el.dataset.target;
+      pop.style.display = 'block';
+    }
+    pop.addEventListener('click', function(){ go(parseInt(pop.dataset.target,10)); });
+    sceneWrap.addEventListener('mouseleave', function(){
+      pop.style.display = 'none';
+      globe.classList.remove('paused');
+    });
+  })();
+
+  /* ---- 3 · AI-assisted engineering constellation ---- */
+  (function(){
+    var root = document.getElementById('cons'); if(!root) return;
+    var W=820, H=420, cx=410, cy=210, rx=350, ry=165;
+    var N=12, seniors=[0,4,8];
+    var cop={x:336,y:210}, cla={x:484,y:210};
+    var nodes=[];
+    for(var i=0;i<N;i++){
+      var a=-Math.PI/2 + i*2*Math.PI/N;
+      nodes.push({x:cx+rx*Math.cos(a), y:cy+ry*Math.sin(a), senior:seniors.indexOf(i)>=0});
+    }
+    var NS='http://www.w3.org/2000/svg';
+    var svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('class','cons-svg'); svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.setAttribute('preserveAspectRatio','none');
+    function line(x1,y1,x2,y2,cls){
+      var l=document.createElementNS(NS,'line');
+      l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+      l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+      l.setAttribute('class',cls); return l;
+    }
+    nodes.forEach(function(n){ svg.appendChild(line(cop.x,cop.y,n.x,n.y,'cons-link flow')); });
+    nodes.forEach(function(n){ if(n.senior) svg.appendChild(line(cla.x,cla.y,n.x,n.y,'cons-link claude flow')); });
+    root.appendChild(svg);
+    function place(el,x,y){ el.style.left=(x/W*100)+'%'; el.style.top=(y/H*100)+'%'; }
+    function core(c,cls,label){
+      var d=document.createElement('div'); d.className='cons-core '+cls;
+      d.innerHTML='<span class="cl">'+label+'</span>'; place(d,c.x,c.y); root.appendChild(d);
+    }
+    core(cop,'cop','GitHub Copilot');
+    core(cla,'cla','Claude');
+    nodes.forEach(function(n,idx){
+      var d=document.createElement('div'); d.className='cons-node'+(n.senior?' senior':'');
+      d.style.setProperty('--d',(idx*0.17).toFixed(2)+'s');
+      place(d,n.x,n.y); root.appendChild(d);
+    });
+  })();
+
+  /* capture mode: jump straight to a slide & hide chrome for screenshots */
+  var _shot = new URLSearchParams(location.search).get('shot');
+  if(_shot !== null){
+    var _n = parseInt(_shot,10);
+    if(_n >= 0 && _n < slides.length){ idx = _n; }
+    document.body.classList.add('capturing');
+  }
+  render(-1);
+})();
+</script>
+</body>
+</html>
