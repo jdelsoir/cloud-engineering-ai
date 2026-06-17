@@ -1,5 +1,7 @@
 # Cloud Engineering Faction — Gen AI Initiatives
 
+**Live:** https://jdelsoir.github.io/cloud-engineering-ai/
+
 A single-file HTML/CSS presentation showcasing the Cloud Engineering Faction's
 initiatives in the Orange Business Gen AI initiative.
 
